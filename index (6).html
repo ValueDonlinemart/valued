@@ -1,0 +1,1213 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ValueD – Compare Smart. Buy Better.</title>
+<meta name="description" content="ValueD is a shopping research demo for India. Browse sample product offers, compare sample prices and keep a personal watchlist. All prices shown are sample demo data.">
+<meta name="theme-color" content="#0e8a4f">
+<!-- Inline SVG favicon (no external files needed) -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%230e8a4f'/%3E%3Cpath d='M14 20l13 28 13-28' fill='none' stroke='white' stroke-width='8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+
+<style>
+/* =====================================================================
+   ValueD – Compare Smart. Buy Better.
+   Single-file static frontend demo. All prices are SAMPLE DEMO DATA.
+   ===================================================================== */
+
+/* ---------- 1. Design tokens ---------- */
+:root{
+  --green-950:#062a20;
+  --green-900:#0a3a2c;
+  --green-700:#0b7a46;
+  --green-600:#0e8a4f;
+  --green-500:#1fa855;
+  --green-400:#3fcb6b;
+  --green-100:#dff4e6;
+  --green-50:#f0faf3;
+  --ink:#0d2620;
+  --ink-soft:#4a5f58;
+  --ink-mute:#7a8c85;
+  --line:#e3e9e6;
+  --bg:#ffffff;
+  --bg-soft:#f5f7f6;
+  --amber:#f5a524;
+  --red:#d6453d;
+  --radius:18px;
+  --radius-sm:12px;
+  --shadow-sm:0 1px 2px rgba(10,58,44,.06),0 2px 8px rgba(10,58,44,.05);
+  --shadow:0 6px 24px rgba(10,58,44,.09);
+  --shadow-lg:0 20px 50px rgba(10,58,44,.16);
+  --header-h:72px;
+  --font:"Segoe UI",system-ui,-apple-system,"Helvetica Neue",Roboto,"Noto Sans",Arial,sans-serif;
+  --ease:cubic-bezier(.22,.8,.3,1);
+}
+
+/* ---------- 2. Base ---------- */
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:calc(var(--header-h) + 12px);-webkit-text-size-adjust:100%}
+body{margin:0;font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1.55;-webkit-font-smoothing:antialiased}
+body.no-scroll{overflow:hidden}
+img,svg{display:block;max-width:100%}
+button{font:inherit;color:inherit;cursor:pointer}
+a{color:inherit}
+h1,h2,h3,h4{line-height:1.15;margin:0;letter-spacing:-.02em}
+p{margin:0}
+ul{margin:0;padding:0;list-style:none}
+.container{width:min(1200px,100% - 40px);margin-inline:auto}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+:focus-visible{outline:3px solid var(--green-500);outline-offset:2px;border-radius:8px}
+.skip-link{position:absolute;left:12px;top:-60px;background:var(--green-900);color:#fff;padding:10px 16px;border-radius:10px;z-index:200;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:12px}
+
+/* ---------- 3. Buttons ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1.5px solid transparent;border-radius:999px;padding:12px 22px;font-weight:650;font-size:.95rem;text-decoration:none;transition:transform .2s var(--ease),box-shadow .2s,background .2s,color .2s,border-color .2s;white-space:nowrap}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:linear-gradient(135deg,var(--green-500),var(--green-700));color:#fff;box-shadow:0 8px 20px rgba(14,138,79,.28)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 26px rgba(14,138,79,.35)}
+.btn-ghost{background:#fff;border-color:var(--line);color:var(--ink)}
+.btn-ghost:hover{border-color:var(--green-500);color:var(--green-700)}
+.btn-soft{background:var(--green-50);color:var(--green-700);border-color:var(--green-100)}
+.btn-soft:hover{background:var(--green-100)}
+.btn-sm{padding:9px 16px;font-size:.85rem}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.icon-btn{position:relative;width:44px;height:44px;border-radius:50%;border:1.5px solid var(--line);background:#fff;display:inline-grid;place-items:center;transition:border-color .2s,background .2s,transform .2s}
+.icon-btn:hover{border-color:var(--green-500);background:var(--green-50)}
+.icon-btn svg{width:21px;height:21px;stroke:var(--ink);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.badge-count{position:absolute;top:-4px;right:-4px;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:var(--green-600);color:#fff;font-size:.72rem;font-weight:700;display:grid;place-items:center;border:2px solid #fff}
+.badge-count.bump{animation:bump .4s var(--ease)}
+@keyframes bump{50%{transform:scale(1.35)}}
+
+/* ---------- 4. Header ---------- */
+.site-header{position:sticky;top:0;z-index:100;height:var(--header-h);background:rgba(255,255,255,.86);backdrop-filter:saturate(1.4) blur(14px);-webkit-backdrop-filter:saturate(1.4) blur(14px);border-bottom:1px solid transparent;transition:box-shadow .25s,border-color .25s}
+.site-header.scrolled{box-shadow:0 4px 20px rgba(10,58,44,.08);border-color:var(--line)}
+.header-inner{height:100%;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+.brand-mark{width:52px;height:44px}
+.brand-text{display:flex;flex-direction:column;line-height:1}
+.brand-name{font-size:1.65rem;font-weight:800;color:var(--green-950);letter-spacing:-.04em}
+.brand-name b{color:var(--green-500);font-weight:800}
+.brand-tag{font-size:.66rem;color:var(--ink-soft);margin-top:4px;letter-spacing:.01em}
+.nav-list{display:flex;align-items:center;gap:6px}
+.nav-list a{display:block;padding:9px 16px;border-radius:999px;text-decoration:none;font-weight:600;font-size:.95rem;color:var(--ink-soft);transition:background .2s,color .2s}
+.nav-list a:hover,.nav-list a.active{color:var(--green-700);background:var(--green-50)}
+.header-actions{display:flex;align-items:center;gap:10px}
+.menu-toggle{display:none}
+
+/* ---------- 5. Hero ---------- */
+.hero{position:relative;overflow:hidden;background:radial-gradient(1000px 500px at 85% 0%,#d4f1de 0%,transparent 60%),radial-gradient(700px 400px at 0% 100%,#e7f7ed 0%,transparent 60%),linear-gradient(180deg,#f2fbf5,#fff);padding:56px 0 72px}
+.hero-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:40px;align-items:center}
+.hero-grid>*{min-width:0}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--green-100);color:var(--green-700);padding:7px 14px;border-radius:999px;font-weight:650;font-size:.82rem;box-shadow:var(--shadow-sm)}
+.eyebrow svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.hero h1{font-size:clamp(2.5rem,6vw,4.4rem);font-weight:800;margin:20px 0 16px;color:var(--green-950)}
+.hero h1 span{display:block;background:linear-gradient(90deg,var(--green-600),var(--green-400));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero-lead{font-size:1.1rem;color:var(--ink-soft);max-width:520px}
+.search-box{margin-top:28px;display:flex;align-items:center;gap:8px;background:#fff;border:2px solid var(--green-100);border-radius:999px;padding:6px 6px 6px 20px;box-shadow:var(--shadow);max-width:600px;transition:border-color .2s,box-shadow .2s}
+.search-box:focus-within{border-color:var(--green-500);box-shadow:0 0 0 5px rgba(31,168,85,.15),var(--shadow)}
+.search-box>svg{width:21px;height:21px;flex:none;stroke:var(--ink-mute);fill:none;stroke-width:2;stroke-linecap:round}
+.search-box input{flex:1;min-width:0;border:0;outline:0;background:transparent;font:inherit;font-size:1rem;padding:12px 4px;color:var(--ink)}
+.search-box input::placeholder{color:var(--ink-mute)}
+.search-clear{display:none;width:34px;height:34px;border:0;border-radius:50%;background:var(--bg-soft);font-size:1.2rem;line-height:1;color:var(--ink-soft)}
+.search-clear.show{display:grid;place-items:center}
+.search-clear:hover{background:var(--green-100)}
+.popular{margin-top:18px;display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.popular>span{font-size:.88rem;font-weight:650;color:var(--ink-soft);margin-right:2px}
+.chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 14px;font-size:.85rem;font-weight:600;color:var(--ink-soft);transition:all .2s}
+.chip:hover{border-color:var(--green-500);color:var(--green-700);background:var(--green-50)}
+.chip.active{background:var(--green-600);border-color:var(--green-600);color:#fff}
+.hero-cta{margin-top:26px;display:flex;flex-wrap:wrap;gap:12px}
+
+/* Hero visual: sample phone with sample offers */
+.hero-visual{position:relative;display:grid;place-items:center;min-height:430px}
+.blob{position:absolute;inset:6% 4%;background:radial-gradient(circle at 40% 40%,#c9efd6,#e9f8ee 60%,transparent 70%);border-radius:50%;filter:blur(2px)}
+.phone{position:relative;width:min(290px,70%);background:#10231d;border-radius:42px;padding:11px;box-shadow:var(--shadow-lg);transform:rotate(4deg);animation:float 6s ease-in-out infinite}
+.phone-screen{background:#fff;border-radius:32px;padding:18px 14px 16px;min-height:390px}
+.phone-notch{width:84px;height:20px;background:#10231d;border-radius:0 0 14px 14px;margin:-18px auto 12px}
+.ph-prod{display:flex;gap:10px;align-items:center;margin-bottom:12px}
+.ph-prod .thumb{width:44px;height:56px;border-radius:10px;background:linear-gradient(135deg,#b9a9ee,#6f5bd0);display:grid;place-items:center;color:#fff}
+.ph-prod .thumb svg{width:26px;height:26px;stroke:currentColor;fill:none;stroke-width:2.2}
+.ph-prod b{display:block;font-size:.95rem}
+.ph-prod small{color:var(--ink-mute);font-size:.72rem}
+.ph-offer{display:flex;align-items:center;gap:10px;padding:10px;border-radius:12px;border:1px solid var(--line);margin-bottom:8px;font-size:.82rem}
+.ph-offer.best{border-color:var(--green-500);background:var(--green-50)}
+.ph-offer .dot{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;font-weight:800;font-size:.72rem;color:#fff;flex:none}
+.ph-offer .name{flex:1;font-weight:650}
+.ph-offer .price{font-weight:800}
+.ph-offer .tag{display:block;font-size:.62rem;color:var(--green-700);font-weight:700}
+.float-badge{position:absolute;right:0;top:12%;background:linear-gradient(135deg,var(--green-600),var(--green-700));color:#fff;border-radius:18px;padding:14px 18px;box-shadow:var(--shadow-lg);transform:rotate(-5deg);animation:float 5s ease-in-out infinite reverse}
+.float-badge small{display:block;font-size:.72rem;opacity:.85}
+.float-badge b{font-size:1.5rem;letter-spacing:-.02em}
+.float-badge em{display:block;font-style:normal;font-size:.62rem;opacity:.8;margin-top:2px}
+@keyframes float{50%{translate:0 -10px}}
+
+/* ---------- 6. Demo banner ---------- */
+.demo-banner{background:var(--green-950);color:#d7efe1;font-size:.84rem;text-align:center;padding:9px 16px}
+.demo-banner b{color:#fff}
+
+/* ---------- 7. Sections ---------- */
+section{padding:72px 0}
+.section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:28px}
+.section-head h2{font-size:clamp(1.6rem,3.4vw,2.2rem);font-weight:800;color:var(--green-950)}
+.section-head p{color:var(--ink-soft);margin-top:6px;max-width:620px}
+.sample-pill{display:inline-flex;align-items:center;gap:6px;background:#fff7e6;color:#8a5a00;border:1px solid #ffe2a6;border-radius:999px;padding:5px 12px;font-size:.75rem;font-weight:700;letter-spacing:.02em;text-transform:uppercase}
+.soft-bg{background:var(--bg-soft)}
+
+/* Categories */
+.cat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.cat-card{display:flex;flex-direction:column;align-items:center;gap:14px;padding:24px 12px 20px;background:#fff;border:1.5px solid var(--line);border-radius:var(--radius);font-weight:650;transition:transform .25s var(--ease),box-shadow .25s,border-color .25s}
+.cat-card:hover{transform:translateY(-5px);box-shadow:var(--shadow);border-color:var(--green-400)}
+.cat-card.active{border-color:var(--green-600);background:var(--green-50)}
+.cat-icon{width:68px;height:68px;border-radius:20px;background:linear-gradient(135deg,var(--green-50),var(--green-100));display:grid;place-items:center;color:var(--green-700);transition:transform .25s var(--ease)}
+.cat-card:hover .cat-icon{transform:scale(1.08) rotate(-4deg)}
+.cat-icon svg{width:38px;height:38px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.cat-card small{font-weight:500;color:var(--ink-mute);margin-top:-8px}
+
+/* Filter bar */
+.filter-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px}
+.chip-row{display:flex;flex-wrap:wrap;gap:8px}
+.sort{display:flex;align-items:center;gap:8px;font-size:.88rem;color:var(--ink-soft);font-weight:600}
+.sort select{border:1.5px solid var(--line);border-radius:999px;padding:8px 14px;background:#fff;font:inherit;font-weight:600;color:var(--ink)}
+.results-info{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px;color:var(--ink-soft);font-size:.95rem;min-height:30px}
+.link-btn{background:none;border:0;padding:0;color:var(--green-700);font-weight:700;text-decoration:underline;text-underline-offset:3px}
+
+/* Product cards */
+.product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:20px}
+.card{position:relative;display:flex;flex-direction:column;background:#fff;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-sm);transition:transform .25s var(--ease),box-shadow .25s}
+.card:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+.card-media{position:relative;aspect-ratio:4/3;display:grid;place-items:center;background:linear-gradient(135deg,var(--tile-a,#eef8f1),var(--tile-b,#dff1e6))}
+.card-media svg.vis{width:42%;height:auto;max-height:70%;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 6px 10px rgba(0,0,0,.18))}
+.card-media img{width:100%;height:100%;object-fit:contain;padding:14px;background:#fff}
+.tag-sample{position:absolute;left:12px;top:12px;background:rgba(255,255,255,.92);color:#8a5a00;font-size:.62rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:4px 9px;border-radius:999px}
+.wl-btn{position:absolute;right:10px;top:10px;width:38px;height:38px;border-radius:50%;border:0;background:rgba(255,255,255,.95);display:grid;place-items:center;box-shadow:var(--shadow-sm);transition:transform .2s var(--ease)}
+.wl-btn:hover{transform:scale(1.1)}
+.wl-btn svg{width:20px;height:20px;fill:none;stroke:var(--ink-soft);stroke-width:2;stroke-linejoin:round}
+.wl-btn[aria-pressed="true"] svg{fill:var(--red);stroke:var(--red)}
+.card-body{display:flex;flex-direction:column;gap:8px;padding:16px 16px 18px;flex:1}
+.cat-label{font-size:.75rem;font-weight:700;color:var(--green-700);text-transform:uppercase;letter-spacing:.06em}
+.card h3{font-size:1.02rem;font-weight:700;letter-spacing:-.01em}
+.rating{display:flex;align-items:center;gap:6px;font-size:.82rem;color:var(--ink-soft)}
+.rating svg{width:15px;height:15px;fill:var(--amber)}
+.price-row{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-top:2px}
+.price{font-size:1.4rem;font-weight:800;letter-spacing:-.02em}
+.price-old{color:var(--ink-mute);text-decoration:line-through;font-size:.9rem}
+.off{background:var(--green-100);color:var(--green-700);font-size:.74rem;font-weight:800;padding:3px 8px;border-radius:8px}
+.lowest-note{font-size:.76rem;color:var(--ink-mute)}
+.offer-mini{display:flex;flex-direction:column;gap:5px;margin:6px 0 4px;padding:10px 12px;background:var(--bg-soft);border-radius:12px;font-size:.8rem}
+.offer-mini li{display:flex;justify-content:space-between;gap:8px;color:var(--ink-soft)}
+.offer-mini li.low{color:var(--green-700);font-weight:700}
+.card-actions{margin-top:auto;display:flex;gap:8px;padding-top:6px}
+.card-actions .btn{flex:1}
+
+/* Empty state */
+.empty{grid-column:1/-1;text-align:center;padding:56px 20px;background:#fff;border:2px dashed var(--line);border-radius:var(--radius)}
+.empty svg{width:54px;height:54px;margin:0 auto 14px;stroke:var(--green-500);fill:none;stroke-width:1.8;stroke-linecap:round}
+.empty h3{font-size:1.3rem;margin-bottom:6px}
+.empty p{color:var(--ink-soft);margin-bottom:18px}
+
+/* Deals */
+.deal-card .card-media{aspect-ratio:16/10}
+.deal-ribbon{position:absolute;right:0;bottom:0;background:var(--green-600);color:#fff;font-weight:800;font-size:.9rem;padding:6px 14px;border-radius:14px 0 0 0}
+
+/* How it works */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;counter-reset:step}
+.step{position:relative;background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:30px 26px;box-shadow:var(--shadow-sm)}
+.step-num{width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,var(--green-500),var(--green-700));color:#fff;font-weight:800;font-size:1.2rem;display:grid;place-items:center;margin-bottom:18px}
+.step h3{font-size:1.2rem;margin-bottom:8px}
+.step p{color:var(--ink-soft)}
+.step:not(:last-child)::after{content:"";position:absolute;right:-17px;top:52px;width:12px;height:12px;border-top:3px solid var(--green-400);border-right:3px solid var(--green-400);transform:rotate(45deg)}
+
+/* Why ValueD */
+.why-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+.why{padding:28px 24px;border-radius:var(--radius);background:linear-gradient(160deg,#fff,var(--green-50));border:1px solid var(--green-100);transition:transform .25s var(--ease),box-shadow .25s}
+.why:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+.why-icon{width:52px;height:52px;border-radius:16px;background:var(--green-600);color:#fff;display:grid;place-items:center;margin-bottom:16px}
+.why-icon svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.why h3{font-size:1.08rem;margin-bottom:8px}
+.why p{color:var(--ink-soft);font-size:.94rem}
+.notice{margin-top:30px;padding:18px 22px;border-radius:var(--radius-sm);background:#fff7e6;border:1px solid #ffe2a6;color:#6e4a07;font-size:.9rem}
+
+/* Footer */
+.site-footer{background:var(--green-950);color:#bcd5c8;padding:60px 0 28px}
+.footer-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1.2fr;gap:36px}
+.site-footer .brand-name{color:#fff}
+.site-footer .brand-tag{color:#9cc0ae}
+.site-footer p{font-size:.92rem;margin-top:14px;max-width:320px}
+.site-footer h4{color:#fff;font-size:1rem;margin-bottom:14px;letter-spacing:0}
+.site-footer li{margin-bottom:9px}
+.site-footer a{text-decoration:none;font-size:.93rem;transition:color .2s}
+.site-footer a:hover{color:#fff;text-decoration:underline}
+.footer-bottom{margin-top:44px;padding-top:22px;border-top:1px solid rgba(255,255,255,.12);display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;font-size:.84rem;color:#8fb3a1}
+
+/* ---------- 8. Overlay, modal, drawer ---------- */
+.overlay{position:fixed;inset:0;background:rgba(6,42,32,.55);backdrop-filter:blur(3px);z-index:150;opacity:0;visibility:hidden;transition:opacity .25s,visibility .25s}
+.overlay.open{opacity:1;visibility:visible}
+.modal{position:fixed;z-index:160;left:50%;top:50%;width:min(680px,100% - 24px);max-height:calc(100dvh - 24px);overflow:auto;background:#fff;border-radius:24px;box-shadow:var(--shadow-lg);transform:translate(-50%,-46%) scale(.97);opacity:0;visibility:hidden;transition:transform .3s var(--ease),opacity .25s,visibility .25s}
+.modal.open{transform:translate(-50%,-50%) scale(1);opacity:1;visibility:visible}
+.modal-head{display:flex;gap:16px;align-items:center;padding:22px 24px;border-bottom:1px solid var(--line);background:linear-gradient(135deg,var(--green-50),#fff)}
+.modal-thumb{width:76px;height:76px;flex:none;border-radius:18px;display:grid;place-items:center;background:linear-gradient(135deg,var(--tile-a),var(--tile-b))}
+.modal-thumb svg{width:44px;height:44px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.modal-head h2{font-size:1.25rem;font-weight:800}
+.modal-close{margin-left:auto;align-self:flex-start;width:40px;height:40px;flex:none;border-radius:50%;border:1.5px solid var(--line);background:#fff;font-size:1.4rem;line-height:1}
+.modal-close:hover{background:var(--bg-soft)}
+.modal-body{padding:20px 24px 24px}
+.offers{display:flex;flex-direction:column;gap:10px;margin-top:14px}
+.offer{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;padding:14px;border:1.5px solid var(--line);border-radius:14px}
+.offer.best{border-color:var(--green-500);background:var(--green-50);box-shadow:0 0 0 4px rgba(31,168,85,.1)}
+.offer.oos{opacity:.6}
+.offer .dot{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;color:#fff;font-weight:800;font-size:.85rem}
+.offer b{display:block}
+.offer small{display:block;color:var(--ink-soft);font-size:.8rem}
+.avail-in{color:var(--green-700)!important;font-weight:650}
+.avail-low{color:#a86b00!important;font-weight:650}
+.avail-out{color:var(--red)!important;font-weight:650}
+.offer-right{text-align:right}
+.offer-right .p{font-size:1.2rem;font-weight:800}
+.best-tag{display:inline-block;margin-bottom:3px;background:var(--green-600);color:#fff;font-size:.66rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:3px 8px;border-radius:999px}
+.offer-right .btn{margin-top:6px}
+.modal-foot{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-top:20px}
+.fine{font-size:.8rem;color:var(--ink-mute);margin-top:16px}
+
+.drawer{position:fixed;z-index:160;top:0;right:0;height:100dvh;width:min(420px,100%);background:#fff;box-shadow:var(--shadow-lg);display:flex;flex-direction:column;transform:translateX(104%);visibility:hidden;transition:transform .35s var(--ease),visibility .35s}
+.drawer.open{transform:none;visibility:visible}
+.drawer-head{display:flex;align-items:center;justify-content:space-between;padding:20px 22px;border-bottom:1px solid var(--line)}
+.drawer-head h2{font-size:1.25rem}
+.drawer-body{flex:1;overflow:auto;padding:16px 22px}
+.wl-item{display:grid;grid-template-columns:60px 1fr;gap:14px;padding:14px 0;border-bottom:1px solid var(--line)}
+.wl-thumb{width:60px;height:60px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(135deg,var(--tile-a),var(--tile-b))}
+.wl-thumb svg{width:32px;height:32px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.wl-item h3{font-size:.95rem;font-weight:700}
+.wl-item .meta{font-size:.82rem;color:var(--ink-soft);margin:2px 0 8px}
+.wl-item .row{display:flex;gap:8px;flex-wrap:wrap}
+.drawer-foot{padding:16px 22px 22px;border-top:1px solid var(--line);font-size:.8rem;color:var(--ink-mute)}
+.drawer-foot .btn{margin-bottom:10px;width:100%}
+
+/* Toast */
+.toast{position:fixed;left:50%;bottom:24px;z-index:300;transform:translate(-50%,30px);background:var(--green-950);color:#fff;padding:12px 20px;border-radius:999px;font-size:.9rem;font-weight:600;box-shadow:var(--shadow-lg);opacity:0;pointer-events:none;transition:opacity .25s,transform .3s var(--ease);max-width:calc(100% - 32px);text-align:center}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* Scroll reveal */
+.reveal{opacity:0;transform:translateY(22px);transition:opacity .6s var(--ease),transform .6s var(--ease)}
+.reveal.in{opacity:1;transform:none}
+
+/* ---------- 9. Responsive ---------- */
+@media (max-width:1024px){
+  .hero-grid{grid-template-columns:minmax(0,1fr);gap:24px}
+  .hero-visual{min-height:380px}
+  .cat-grid{grid-template-columns:repeat(4,1fr)}
+  .why-grid{grid-template-columns:repeat(2,1fr)}
+  .footer-grid{grid-template-columns:1fr 1fr}
+}
+@media (max-width:860px){
+  .menu-toggle{display:inline-grid}
+  .main-nav{position:absolute;left:0;right:0;top:var(--header-h);background:#fff;border-bottom:1px solid var(--line);box-shadow:0 20px 30px rgba(10,58,44,.1);padding:10px 20px 18px;display:none}
+  .main-nav.open{display:block;animation:drop .25s var(--ease)}
+  .nav-list{flex-direction:column;align-items:stretch;gap:2px}
+  .nav-list a{padding:14px 16px;font-size:1rem}
+  .cat-grid{grid-template-columns:repeat(2,1fr)}
+  .steps{grid-template-columns:1fr}
+  .step:not(:last-child)::after{display:none}
+}
+@keyframes drop{from{opacity:0;transform:translateY(-8px)}}
+@media (max-width:560px){
+  :root{--header-h:64px}
+  section{padding:52px 0}
+  .brand-mark{width:44px;height:38px}
+  .brand-name{font-size:1.4rem}
+  .brand-tag{display:none}
+  .hero{padding:36px 0 52px}
+  .search-box{padding-left:14px}
+  .search-box .btn{padding:12px 16px}
+  .why-grid,.footer-grid{grid-template-columns:1fr}
+  .float-badge{right:0;top:4%;transform:rotate(-5deg) scale(.8)}
+  .phone{width:min(260px,72%)}
+  .offer{grid-template-columns:auto 1fr}
+  .offer-right{grid-column:1/-1;text-align:left;display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .modal-head{padding:18px}
+  .modal-body{padding:16px 18px 20px}
+  .sort{width:100%}
+  .sort select{flex:1}
+}
+
+/* ---------- 10. Reduced motion ---------- */
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  .reveal{opacity:1;transform:none}
+}
+</style>
+</head>
+<body>
+
+<!-- Shared SVG gradient used by the logo (referenced via url(#vdGrad)) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="vdGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3fcb6b"/>
+      <stop offset="1" stop-color="#0b7a46"/>
+    </linearGradient>
+  </defs>
+</svg>
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<!-- =====================================================================
+     HEADER
+     ===================================================================== -->
+<header class="site-header" id="siteHeader">
+  <div class="container header-inner">
+    <a class="brand" href="#home" aria-label="ValueD – Compare Smart. Buy Better. Home">
+      <!-- ValueD logo mark: a "V" and "D" with a shopping cart -->
+      <svg class="brand-mark" viewBox="0 0 64 56" aria-hidden="true">
+        <path d="M7 9 L24 46 L38 14" fill="none" stroke="url(#vdGrad)" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M31 47 H42 a18 18 0 0 0 0 -36 H33" fill="none" stroke="url(#vdGrad)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M37 22 h3 l2.2 9 h8 l2 -7 h-11" fill="none" stroke="#0a3a2c" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="43" cy="35.5" r="1.6" fill="#0a3a2c"/><circle cx="50" cy="35.5" r="1.6" fill="#0a3a2c"/>
+      </svg>
+      <span class="brand-text">
+        <span class="brand-name">Value<b>D</b></span>
+        <span class="brand-tag">Compare Smart. Buy Better.</span>
+      </span>
+    </a>
+
+    <nav class="main-nav" id="mainNav" aria-label="Main navigation">
+      <ul class="nav-list">
+        <li><a href="#home" class="active">Home</a></li>
+        <li><a href="#categories">Categories</a></li>
+        <li><a href="#deals">Deals</a></li>
+        <li><a href="#how-it-works">How It Works</a></li>
+      </ul>
+    </nav>
+
+    <div class="header-actions">
+      <button class="icon-btn" id="headerSearchBtn" type="button" aria-label="Search products">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      </button>
+      <button class="icon-btn" id="watchBtn" type="button" aria-label="Open watchlist, 0 items" aria-haspopup="dialog">
+        <svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-9.3-9.2C1.4 8.4 3.4 5 6.8 5c2 0 3.4 1.1 5.2 3 1.8-1.9 3.2-3 5.2-3 3.4 0 5.4 3.400 4.100 6.800C19.500 16.400 12 21 12 21z"/></svg>
+        <span class="badge-count" id="watchCount">0</span>
+      </button>
+      <button class="icon-btn menu-toggle" id="menuToggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mainNav">
+        <svg viewBox="0 0 24 24" id="menuIcon"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="demo-banner" role="note">
+  <b>Demo site:</b> all products, prices, discounts, ratings and offers on ValueD are <b>sample demo data</b>, not live or verified prices.
+</div>
+
+<main id="main">
+
+<!-- =====================================================================
+     HERO
+     ===================================================================== -->
+<section class="hero" id="home" style="padding-top:56px">
+  <div class="container hero-grid">
+    <div>
+      <span class="eyebrow">
+        <svg viewBox="0 0 24 24"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.100L5 10l5.100-1.900z"/></svg>
+        Smart shopping research for India
+      </span>
+      <h1>Compare Smart. <span>Buy Better.</span></h1>
+      <p class="hero-lead">Search products, look at offers side by side and keep a personal watchlist. ValueD helps you research before you buy — this demo uses sample prices only.</p>
+
+      <form class="search-box" id="searchForm" role="search" autocomplete="off">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+        <label for="searchInput" class="sr-only">Search products, brands or categories</label>
+        <input id="searchInput" type="search" placeholder="Search products, brands or models…" enterkeyhint="search">
+        <button type="button" class="search-clear" id="searchClear" aria-label="Clear search">×</button>
+        <button type="submit" class="btn btn-primary">Search</button>
+      </form>
+
+      <div class="popular" aria-label="Popular searches">
+        <span>Popular searches:</span>
+        <button class="chip" type="button" data-search="smartphones">Smartphones</button>
+        <button class="chip" type="button" data-search="laptops">Laptops</button>
+        <button class="chip" type="button" data-search="headphones">Headphones</button>
+        <button class="chip" type="button" data-search="smartwatches">Smartwatches</button>
+      </div>
+
+      <div class="hero-cta">
+        <a class="btn btn-primary" href="#products" id="exploreBtn">Explore Products
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+        <a class="btn btn-ghost" href="#how-it-works">How it works</a>
+      </div>
+    </div>
+
+    <div class="hero-visual" aria-hidden="true">
+      <div class="blob"></div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="phone-notch"></div>
+          <div class="ph-prod">
+            <div class="thumb"><svg viewBox="0 0 48 48"><rect x="14" y="4" width="20" height="40" rx="4"/><path d="M21 9h6"/></svg></div>
+            <div><b>Sample Smartphone</b><small>128GB • 5G • demo data</small></div>
+          </div>
+          <div class="ph-offer"><span class="dot" style="background:#e2874b">A</span><span class="name">Retailer A</span><span class="price">₹74,999</span></div>
+          <div class="ph-offer best"><span class="dot" style="background:#2f7de1">B</span><span class="name">Retailer B<span class="tag">Lowest sample price</span></span><span class="price">₹72,499</span></div>
+          <div class="ph-offer"><span class="dot" style="background:#2c9a6a">C</span><span class="name">Retailer C</span><span class="price">₹75,999</span></div>
+          <div class="ph-offer"><span class="dot" style="background:#d6453d">D</span><span class="name">Retailer D</span><span class="price">₹73,990</span></div>
+        </div>
+      </div>
+      <div class="float-badge"><small>Sample lowest</small><b>₹72,499</b><em>Illustration only</em></div>
+    </div>
+  </div>
+</section>
+
+<!-- =====================================================================
+     CATEGORIES
+     ===================================================================== -->
+<section id="categories">
+  <div class="container">
+    <div class="section-head reveal">
+      <div>
+        <h2>Shop by Category</h2>
+        <p>Pick a category to filter the sample catalogue below.</p>
+      </div>
+    </div>
+    <div class="cat-grid" id="catGrid"></div>
+  </div>
+</section>
+
+<!-- =====================================================================
+     TRENDING PRODUCTS (search + category filter results)
+     ===================================================================== -->
+<section id="products" class="soft-bg">
+  <div class="container">
+    <div class="section-head reveal">
+      <div>
+        <h2>Trending Products</h2>
+        <p>Browse sample products and compare sample offers from different retailer names.</p>
+      </div>
+      <span class="sample-pill">Sample demo data</span>
+    </div>
+
+    <div class="filter-bar">
+      <div class="chip-row" id="chipRow" role="group" aria-label="Filter by category"></div>
+      <label class="sort">Sort by
+        <select id="sortSelect">
+          <option value="relevance">Featured</option>
+          <option value="price-asc">Price: low to high</option>
+          <option value="price-desc">Price: high to low</option>
+          <option value="rating">Rating</option>
+          <option value="discount">Biggest sample discount</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="results-info" id="resultsInfo" aria-live="polite"></div>
+    <div class="product-grid" id="productGrid"></div>
+  </div>
+</section>
+
+<!-- =====================================================================
+     BEST DEALS
+     ===================================================================== -->
+<section id="deals">
+  <div class="container">
+    <div class="section-head reveal">
+      <div>
+        <h2>Today's Best Deals</h2>
+        <p>Sample discounts shown against a sample list price. Prices and discounts are demonstration data until ValueD is connected to real price sources.</p>
+      </div>
+      <span class="sample-pill">Demo discounts</span>
+    </div>
+    <div class="product-grid" id="dealGrid"></div>
+  </div>
+</section>
+
+<!-- =====================================================================
+     HOW IT WORKS
+     ===================================================================== -->
+<section id="how-it-works" class="soft-bg">
+  <div class="container">
+    <div class="section-head reveal">
+      <div>
+        <h2>How It Works</h2>
+        <p>Three simple steps from curiosity to a confident choice.</p>
+      </div>
+    </div>
+    <div class="steps">
+      <article class="step reveal"><div class="step-num">1</div><h3>Search for a product</h3><p>Type a product, brand or category — or tap a category card to start browsing.</p></article>
+      <article class="step reveal"><div class="step-num">2</div><h3>Compare available offers</h3><p>Open the comparison view to see sample offers, delivery details and availability side by side.</p></article>
+      <article class="step reveal"><div class="step-num">3</div><h3>Choose the offer that suits you</h3><p>Weigh price, delivery and availability, then decide. Save favourites to your watchlist for later.</p></article>
+    </div>
+  </div>
+</section>
+
+<!-- =====================================================================
+     WHY VALUED
+     ===================================================================== -->
+<section id="why">
+  <div class="container">
+    <div class="section-head reveal">
+      <div>
+        <h2>Why Choose ValueD</h2>
+        <p>A clean, honest place to research products.</p>
+      </div>
+    </div>
+    <div class="why-grid">
+      <article class="why reveal">
+        <div class="why-icon"><svg viewBox="0 0 24 24"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg></div>
+        <h3>Easy price comparison</h3><p>Offers are laid out in one clear view, with the lowest sample price highlighted.</p>
+      </article>
+      <article class="why reveal">
+        <div class="why-icon"><svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.500-3.200 8-8 9-4.800-1-8-4.500-8-9V6z"/><path d="M8.500 12l2.500 2.500 4.500-5"/></svg></div>
+        <h3>Transparent sample offers</h3><p>Everything on this demo is clearly labelled as sample data — no hidden claims.</p>
+      </article>
+      <article class="why reveal">
+        <div class="why-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg></div>
+        <h3>User-friendly research</h3><p>Search, filters, sorting and a personal watchlist designed to be quick on any device.</p>
+      </article>
+      <article class="why reveal">
+        <div class="why-icon"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.500 10.900c.700.600 1 1.300 1 2.100h5c0-.800.300-1.500 1-2.100A6 6 0 0 0 12 3z"/></svg></div>
+        <h3>Smarter buying decisions</h3><p>Look at the full picture — price, delivery and availability — before you choose.</p>
+      </article>
+    </div>
+    <p class="notice reveal"><b>Please note:</b> ValueD is currently a static demonstration. It does not show live prices, check real stock, send price-drop alerts or sell anything. Product and retailer names appear only as illustrative examples and do not imply any partnership or endorsement.</p>
+  </div>
+</section>
+
+</main>
+
+<!-- =====================================================================
+     FOOTER
+     ===================================================================== -->
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <a class="brand" href="#home" aria-label="ValueD home">
+          <svg class="brand-mark" viewBox="0 0 64 56" aria-hidden="true">
+            <path d="M7 9 L24 46 L38 14" fill="none" stroke="url(#vdGrad)" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M31 47 H42 a18 18 0 0 0 0 -36 H33" fill="none" stroke="url(#vdGrad)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M37 22 h3 l2.2 9 h8 l2 -7 h-11" fill="none" stroke="#062a20" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="43" cy="35.500" r="1.600" fill="#062a20"/><circle cx="50" cy="35.500" r="1.600" fill="#062a20"/>
+          </svg>
+          <span class="brand-text"><span class="brand-name">Value<b>D</b></span><span class="brand-tag">Compare Smart. Buy Better.</span></span>
+        </a>
+        <p>A shopping research demo for India. All prices and offers shown are sample data.</p>
+      </div>
+      <div>
+        <h4>Quick links</h4>
+        <ul>
+          <li><a href="#home">Home</a></li>
+          <li><a href="#categories">Categories</a></li>
+          <li><a href="#deals">Deals</a></li>
+          <li><a href="#how-it-works">How It Works</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Categories</h4>
+        <ul id="footerCats"></ul>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul>
+          <li><a href="#" data-placeholder="Contact page">Contact (placeholder)</a></li>
+          <li><a href="#" data-placeholder="Privacy Policy">Privacy Policy (placeholder)</a></li>
+          <li><a href="#" data-placeholder="Terms and Conditions">Terms &amp; Conditions (placeholder)</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span id="year">2026</span> ValueD. All rights reserved.</span>
+      <span>Sample demo data only — not live or verified prices.</span>
+    </div>
+  </div>
+</footer>
+
+<!-- Overlay + Compare modal + Watchlist drawer -->
+<div class="overlay" id="overlay"></div>
+<div class="modal" id="compareModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" tabindex="-1"></div>
+<aside class="drawer" id="watchDrawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle" tabindex="-1">
+  <div class="drawer-head">
+    <h2 id="drawerTitle">My Watchlist</h2>
+    <button class="modal-close" type="button" id="drawerClose" aria-label="Close watchlist" style="margin-left:0">×</button>
+  </div>
+  <div class="drawer-body" id="drawerBody"></div>
+  <div class="drawer-foot" id="drawerFoot"></div>
+</aside>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* =====================================================================
+   ValueD – application script (vanilla JavaScript, no dependencies)
+   ---------------------------------------------------------------------
+   SECTIONS
+     1. Configuration (retailers, store links, storage key)
+     2. Sample catalogue  (SAMPLE DEMO DATA – replace with real source)
+     3. Helpers
+     4. State + localStorage watchlist
+     5. Rendering (categories, products, deals, watchlist)
+     6. Search + filtering
+     7. Modal / drawer layer manager (focus trap, Esc, scroll lock)
+     8. Event wiring
+   ===================================================================== */
+(function () {
+  'use strict';
+
+  /* ---------- 1. CONFIGURATION ---------- */
+
+  // Retailer display settings. "url" is intentionally EMPTY.
+  // The "Visit Store" button only appears when a valid https:// URL is set
+  // here (for a whole retailer) or on an individual offer (offer.url).
+  // Never point these at fake checkout pages.
+  var RETAILERS = {
+    'Amazon':           { color: '#e2874b', url: '' },
+    'Flipkart':         { color: '#2f7de1', url: '' },
+    'Croma':            { color: '#2c9a6a', url: '' },
+    'Reliance Digital': { color: '#d6453d', url: '' },
+    'Vijay Sales':      { color: '#7b5bd6', url: '' },
+    'Tata CLiQ':        { color: '#c2478d', url: '' }
+  };
+
+  var STORAGE_KEY = 'valued.watchlist.v1';
+
+  /* Category definitions: key, label, tile colours and inline SVG icon (48x48 grid) */
+  var CATEGORIES = [
+    { key: 'smartphones', label: 'Smartphones',    a: '#7fd6a0', b: '#0e8a4f', icon: '<rect x="14" y="4" width="20" height="40" rx="4"/><path d="M21 9h6M22 38h4"/>' },
+    { key: 'laptops',     label: 'Laptops',        a: '#6fb7e8', b: '#2f6fd1', icon: '<rect x="9" y="10" width="30" height="21" rx="2"/><path d="M4 37h40l-3 4H7z"/>' },
+    { key: 'headphones',  label: 'Headphones',     a: '#b19cf0', b: '#6a4fd0', icon: '<path d="M9 29v-5a15 15 0 0 1 30 0v5"/><rect x="7" y="27" width="8" height="13" rx="3"/><rect x="33" y="27" width="8" height="13" rx="3"/>' },
+    { key: 'smartwatches',label: 'Smartwatches',   a: '#f2a37a', b: '#d9622b', icon: '<rect x="13" y="12" width="22" height="24" rx="7"/><path d="M18 12V5h12v7M18 36v7h12v-7M24 19v6l4 2"/>' },
+    { key: 'tablets',     label: 'Tablets',        a: '#e48bb8', b: '#b5427f', icon: '<rect x="8" y="7" width="32" height="34" rx="4"/><circle cx="24" cy="35" r="1.500"/>' },
+    { key: 'televisions', label: 'Televisions',    a: '#6fd0d0', b: '#1b8f9a', icon: '<rect x="4" y="8" width="40" height="27" rx="3"/><path d="M16 43h16M24 35v8"/>' },
+    { key: 'cameras',     label: 'Cameras',        a: '#f0cc6a', b: '#c98f12', icon: '<rect x="5" y="14" width="38" height="27" rx="5"/><circle cx="24" cy="27" r="8"/><path d="M16 14l2-5h10l2 5"/>' },
+    { key: 'appliances',  label: 'Home Appliances',a: '#9bb4d6', b: '#4d6b99', icon: '<rect x="9" y="4" width="30" height="40" rx="4"/><circle cx="24" cy="28" r="9"/><circle cx="24" cy="28" r="4.500"/><path d="M14 10h4M22 10h2"/>' }
+  ];
+  var CAT_BY_KEY = {};
+  CATEGORIES.forEach(function (c) { CAT_BY_KEY[c.key] = c; });
+
+  /* ---------- 2. SAMPLE CATALOGUE (SAMPLE DEMO DATA) ----------
+     EXTENSION POINT: to connect real data later, replace getProducts()
+     below with a fetch() to your own API and keep this object shape:
+       { id, name, cat, rating, reviews, mrp, tags, offers:[{r,p,d,a,url?}] }
+     "a" (availability) must be one of: 'In stock' | 'Limited stock' | 'Out of stock'.
+     Every price, MRP and rating below is invented for demonstration. */
+  function O(r, p, d, a) { return { r: r, p: p, d: d, a: a }; }
+
+  var PRODUCTS = [
+    { id: 'p01', name: 'Apple iPhone 16 (128GB)', cat: 'smartphones', rating: 4.6, reviews: '12.4k', mrp: 79900, tags: 'apple iphone mobile phone 5g ios',
+      offers: [O('Amazon',74999,'Free delivery','In stock'),O('Flipkart',72499,'Free delivery','In stock'),O('Croma',75999,'Delivery in 3–4 days','Limited stock'),O('Reliance Digital',73990,'Free delivery','In stock')] },
+    { id: 'p02', name: 'Samsung Galaxy S24 (8GB / 256GB)', cat: 'smartphones', rating: 4.5, reviews: '9.8k', mrp: 69999, tags: 'samsung galaxy mobile phone 5g android',
+      offers: [O('Flipkart',59999,'Free delivery','In stock'),O('Amazon',61499,'Free delivery','In stock'),O('Vijay Sales',62990,'Delivery in 2–3 days','In stock')] },
+    { id: 'p03', name: 'OnePlus 12R (16GB / 256GB)', cat: 'smartphones', rating: 4.4, reviews: '6.1k', mrp: 45999, tags: 'oneplus mobile phone 5g android',
+      offers: [O('Amazon',39999,'Free delivery','In stock'),O('Croma',41499,'Delivery in 3–5 days','In stock'),O('Tata CLiQ',40990,'Free delivery','Limited stock')] },
+    { id: 'p04', name: 'Apple MacBook Air M2 (8GB / 256GB)', cat: 'laptops', rating: 4.7, reviews: '7.3k', mrp: 109900, tags: 'apple macbook air m2 notebook mac',
+      offers: [O('Amazon',89990,'Free delivery','In stock'),O('Croma',94990,'Free delivery','In stock'),O('Reliance Digital',92900,'Delivery in 2–4 days','Limited stock'),O('Vijay Sales',91990,'Free delivery','In stock')] },
+    { id: 'p05', name: 'HP Pavilion 15 (Core i5, 16GB / 512GB)', cat: 'laptops', rating: 4.2, reviews: '3.9k', mrp: 78999, tags: 'hp pavilion notebook windows intel i5',
+      offers: [O('Flipkart',62990,'Free delivery','In stock'),O('Amazon',64499,'Free delivery','In stock'),O('Reliance Digital',66990,'Delivery in 4–6 days','Out of stock')] },
+    { id: 'p06', name: 'Sony WH-1000XM5 Wireless Headphones', cat: 'headphones', rating: 4.6, reviews: '5.2k', mrp: 34990, tags: 'sony wh-1000xm5 noise cancelling over ear wireless bluetooth',
+      offers: [O('Amazon',26990,'Free delivery','In stock'),O('Croma',28490,'Free delivery','In stock'),O('Tata CLiQ',27999,'Delivery in 2–3 days','Limited stock')] },
+    { id: 'p07', name: 'Sony WF-C700N Noise Cancelling Earbuds', cat: 'headphones', rating: 4.3, reviews: '4.4k', mrp: 9990, tags: 'sony wf-c700n earbuds tws wireless bluetooth noise cancelling',
+      offers: [O('Croma',6990,'Free delivery','In stock'),O('Amazon',7490,'Free delivery','In stock'),O('Flipkart',7199,'Delivery in 2–3 days','In stock'),O('Vijay Sales',7690,'Free delivery','Limited stock')] },
+    { id: 'p08', name: 'Apple Watch SE (GPS, 40mm)', cat: 'smartwatches', rating: 4.5, reviews: '3.3k', mrp: 29900, tags: 'apple watch se smartwatch ios fitness',
+      offers: [O('Amazon',24990,'Free delivery','In stock'),O('Flipkart',25490,'Free delivery','In stock'),O('Reliance Digital',26500,'Delivery in 3–5 days','In stock')] },
+    { id: 'p09', name: 'Noise ColorFit Pro 5 Smartwatch', cat: 'smartwatches', rating: 4.1, reviews: '11.7k', mrp: 6999, tags: 'noise colorfit smartwatch fitness band bluetooth calling',
+      offers: [O('Amazon',3499,'Free delivery','In stock'),O('Flipkart',3299,'Free delivery','In stock'),O('Tata CLiQ',3799,'Delivery in 3–4 days','Limited stock')] },
+    { id: 'p10', name: 'Apple iPad (10th Gen, 64GB, Wi-Fi)', cat: 'tablets', rating: 4.6, reviews: '6.6k', mrp: 39900, tags: 'apple ipad tablet ios wifi',
+      offers: [O('Amazon',31999,'Free delivery','In stock'),O('Croma',33900,'Free delivery','In stock'),O('Vijay Sales',32990,'Delivery in 2–4 days','In stock')] },
+    { id: 'p11', name: 'Samsung Galaxy Tab S9 FE (6GB / 128GB)', cat: 'tablets', rating: 4.3, reviews: '2.1k', mrp: 36999, tags: 'samsung galaxy tab tablet android s pen',
+      offers: [O('Flipkart',28999,'Free delivery','In stock'),O('Amazon',29990,'Free delivery','Limited stock'),O('Reliance Digital',31499,'Delivery in 3–5 days','In stock')] },
+    { id: 'p12', name: 'LG 55" 4K UHD Smart TV (webOS)', cat: 'televisions', rating: 4.4, reviews: '8.0k', mrp: 59990, tags: 'lg tv television 55 inch 4k uhd smart webos led',
+      offers: [O('Reliance Digital',43999,'Free delivery + installation','In stock'),O('Amazon',44990,'Free delivery','In stock'),O('Croma',46490,'Free delivery + installation','In stock'),O('Flipkart',45499,'Delivery in 4–6 days','Limited stock')] },
+    { id: 'p13', name: 'Sony Bravia 43" Full HD Smart TV', cat: 'televisions', rating: 4.5, reviews: '3.6k', mrp: 54900, tags: 'sony bravia tv television 43 inch full hd smart google',
+      offers: [O('Croma',38990,'Free delivery + installation','In stock'),O('Amazon',39990,'Free delivery','In stock'),O('Vijay Sales',40490,'Delivery in 3–5 days','Limited stock')] },
+    { id: 'p14', name: 'Canon EOS R50 Mirrorless Camera (Kit)', cat: 'cameras', rating: 4.6, reviews: '1.4k', mrp: 79995, tags: 'canon eos r50 mirrorless camera dslr photography lens kit',
+      offers: [O('Amazon',68990,'Free delivery','In stock'),O('Vijay Sales',70490,'Free delivery','In stock'),O('Croma',71995,'Delivery in 3–5 days','Limited stock')] },
+    { id: 'p15', name: 'GoPro HERO12 Black Action Camera', cat: 'cameras', rating: 4.4, reviews: '2.5k', mrp: 41500, tags: 'gopro hero12 action camera 5.3k video waterproof',
+      offers: [O('Amazon',32990,'Free delivery','In stock'),O('Flipkart',33999,'Free delivery','In stock'),O('Tata CLiQ',34990,'Delivery in 2–4 days','Out of stock')] },
+    { id: 'p16', name: 'LG 7 kg Front Load Washing Machine', cat: 'appliances', rating: 4.4, reviews: '5.8k', mrp: 43990, tags: 'lg washing machine front load 7kg inverter home appliance washer',
+      offers: [O('Reliance Digital',31990,'Free delivery + installation','In stock'),O('Croma',32990,'Free delivery + installation','In stock'),O('Amazon',33490,'Free delivery','Limited stock')] }
+  ];
+
+  /* Placeholder for future real data source (see EXTENSION POINT above) */
+  function getProducts() { return PRODUCTS; }
+
+  /* Pre-compute lowest price, discount and a "haystack" string for search */
+  getProducts().forEach(function (p) {
+    var avail = p.offers.filter(function (o) { return o.a !== 'Out of stock'; });
+    var pool = avail.length ? avail : p.offers;
+    p.lowest = pool.reduce(function (m, o) { return o.p < m.p ? o : m; }, pool[0]);
+    p.discount = Math.max(0, Math.round((1 - p.lowest.p / p.mrp) * 100));
+    p.hay = (p.name + ' ' + CAT_BY_KEY[p.cat].label + ' ' + p.cat + ' ' + p.tags).toLowerCase();
+  });
+
+  /* Search synonyms so "phone", "tv", "earbuds" etc. work */
+  var SYNONYMS = {
+    phone: 'smartphones', phones: 'smartphones', mobile: 'smartphones', mobiles: 'smartphones', smartphone: 'smartphones',
+    laptop: 'laptops', notebook: 'laptops', headphone: 'headphones', earphones: 'headphones', earbuds: 'headphones', headset: 'headphones',
+    watch: 'smartwatches', watches: 'smartwatches', smartwatch: 'smartwatches', tablet: 'tablets', tv: 'televisions',
+    television: 'televisions', camera: 'cameras', appliance: 'appliances', washer: 'appliances', 'washing': 'appliances'
+  };
+
+  /* ---------- 3. HELPERS ---------- */
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+
+  var inr = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 });
+  function fmt(n) { return inr.format(n); }
+
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function byId(id) { return getProducts().filter(function (p) { return p.id === id; })[0]; }
+  function isValidUrl(u) {
+    if (!u || typeof u !== 'string') return false;
+    try { var x = new URL(u); return x.protocol === 'https:'; } catch (e) { return false; }
+  }
+  function offerUrl(o) { return isValidUrl(o.url) ? o.url : (RETAILERS[o.r] && isValidUrl(RETAILERS[o.r].url) ? RETAILERS[o.r].url : ''); }
+  function retailerColor(name) { return (RETAILERS[name] && RETAILERS[name].color) || '#5b6f67'; }
+  function catIcon(key, cls) {
+    return '<svg class="' + (cls || '') + '" viewBox="0 0 48 48" aria-hidden="true">' + CAT_BY_KEY[key].icon + '</svg>';
+  }
+  function tileStyle(key) { return '--tile-a:' + CAT_BY_KEY[key].a + ';--tile-b:' + CAT_BY_KEY[key].b; }
+  function availClass(a) { return a === 'In stock' ? 'avail-in' : a === 'Limited stock' ? 'avail-low' : 'avail-out'; }
+  var STAR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.500l2.900 6 6.600.9-4.800 4.600 1.200 6.500L12 17.300 6.100 20.500l1.200-6.500L2.500 9.400l6.600-.9z"/></svg>';
+  var HEART = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.500-4.600-9.300-9.200C1.400 8.400 3.400 5 6.800 5c2 0 3.400 1.100 5.200 3 1.800-1.900 3.200-3 5.200-3 3.400 0 5.400 3.400 4.100 6.800C19.500 16.400 12 21 12 21z"/></svg>';
+
+  var toastTimer;
+  function toast(msg) {
+    var t = $('#toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.classList.remove('show'); }, 2600);
+  }
+
+  /* ---------- 4. STATE + WATCHLIST (localStorage) ---------- */
+  var state = { query: '', cat: 'all', sort: 'relevance', watch: loadWatch() };
+
+  function loadWatch() {
+    try {
+      var raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      if (!Array.isArray(raw)) return [];
+      return raw.filter(function (id, i) { return typeof id === 'string' && raw.indexOf(id) === i && byId(id); });
+    } catch (e) { return []; }              // storage blocked/unavailable → start empty
+  }
+  function saveWatch() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state.watch)); }
+    catch (e) { /* storage unavailable (private mode etc.) – watchlist works for this visit only */ }
+  }
+  function inWatch(id) { return state.watch.indexOf(id) !== -1; }
+
+  function toggleWatch(id) {
+    var p = byId(id); if (!p) return;
+    if (inWatch(id)) {
+      state.watch = state.watch.filter(function (x) { return x !== id; });
+      toast('Removed from watchlist');
+    } else {
+      state.watch.push(id);
+      toast('Added to watchlist (saved in this browser)');
+    }
+    saveWatch();
+    refreshWatchUI();
+  }
+
+  /* Re-sync every watchlist-dependent piece of UI without a full re-render */
+  function refreshWatchUI() {
+    var n = state.watch.length, c = $('#watchCount');
+    c.textContent = n;
+    c.classList.remove('bump'); void c.offsetWidth; c.classList.add('bump');
+    $('#watchBtn').setAttribute('aria-label', 'Open watchlist, ' + n + (n === 1 ? ' item' : ' items'));
+    $$('.wl-btn').forEach(function (b) {
+      var on = inWatch(b.dataset.id);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      b.setAttribute('aria-label', (on ? 'Remove ' : 'Add ') + byId(b.dataset.id).name + (on ? ' from' : ' to') + ' watchlist');
+    });
+    $$('[data-modal-watch]').forEach(function (b) {
+      var on = inWatch(b.dataset.modalWatch);
+      b.textContent = on ? '♥ In watchlist – remove' : '♡ Add to watchlist';
+    });
+    renderDrawer();
+  }
+
+  /* ---------- 5. RENDERING ---------- */
+  function renderCategories() {
+    $('#catGrid').innerHTML = CATEGORIES.map(function (c) {
+      var count = getProducts().filter(function (p) { return p.cat === c.key; }).length;
+      return '<button type="button" class="cat-card reveal" data-cat="' + c.key + '" aria-label="Show ' + esc(c.label) + ' (' + count + ' sample products)">' +
+        '<span class="cat-icon"><svg viewBox="0 0 48 48" aria-hidden="true">' + c.icon + '</svg></span>' +
+        '<span>' + esc(c.label) + '</span><small>' + count + ' sample items</small></button>';
+    }).join('');
+
+    $('#chipRow').innerHTML = '<button type="button" class="chip" data-chip="all">All</button>' +
+      CATEGORIES.map(function (c) { return '<button type="button" class="chip" data-chip="' + c.key + '">' + esc(c.label) + '</button>'; }).join('');
+
+    $('#footerCats').innerHTML = CATEGORIES.map(function (c) {
+      return '<li><a href="#products" data-footcat="' + c.key + '">' + esc(c.label) + '</a></li>';
+    }).join('');
+  }
+
+  function syncCategoryUI() {
+    $$('.cat-card').forEach(function (b) { b.classList.toggle('active', b.dataset.cat === state.cat); });
+    $$('#chipRow .chip').forEach(function (b) {
+      var on = b.dataset.chip === state.cat;
+      b.classList.toggle('active', on); b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+  }
+
+  /* Product visual: inline SVG tile. If an optional p.image URL is ever added
+     and fails to load, the onerror handler swaps in the SVG fallback. */
+  function mediaHTML(p) {
+    var fallback = catIcon(p.cat, 'vis');
+    if (p.image) {
+      return '<img src="' + esc(p.image) + '" alt="' + esc(p.name) + '" loading="lazy" data-fallback="1">';
+    }
+    return fallback;
+  }
+
+  function productCard(p) {
+    var offers = p.offers.slice().sort(function (a, b) { return a.p - b.p; }).slice(0, 3);
+    var mini = offers.map(function (o) {
+      var low = o === p.lowest || (o.r === p.lowest.r && o.p === p.lowest.p);
+      return '<li class="' + (low ? 'low' : '') + '"><span>' + esc(o.r) + '</span><span>' + fmt(o.p) + '</span></li>';
+    }).join('');
+    var on = inWatch(p.id);
+    return '<article class="card reveal" data-id="' + p.id + '">' +
+      '<div class="card-media" style="' + tileStyle(p.cat) + '">' + mediaHTML(p) +
+        '<span class="tag-sample">Sample data</span>' +
+        '<button type="button" class="wl-btn" data-id="' + p.id + '" aria-pressed="' + on + '" aria-label="' + (on ? 'Remove ' : 'Add ') + esc(p.name) + (on ? ' from' : ' to') + ' watchlist">' + HEART + '</button>' +
+      '</div>' +
+      '<div class="card-body">' +
+        '<span class="cat-label">' + esc(CAT_BY_KEY[p.cat].label) + '</span>' +
+        '<h3>' + esc(p.name) + '</h3>' +
+        '<div class="rating">' + STAR + '<b>' + p.rating.toFixed(1) + '</b><span>(' + esc(p.reviews) + ' sample ratings)</span></div>' +
+        '<div class="price-row"><span class="price">' + fmt(p.lowest.p) + '</span><span class="lowest-note">lowest sample price</span></div>' +
+        '<ul class="offer-mini" aria-label="Sample offers">' + mini + '</ul>' +
+        '<div class="card-actions"><button type="button" class="btn btn-primary btn-sm" data-compare="' + p.id + '">Compare Prices</button></div>' +
+      '</div></article>';
+  }
+
+  function dealCard(p) {
+    return '<article class="card deal-card reveal" data-id="' + p.id + '">' +
+      '<div class="card-media" style="' + tileStyle(p.cat) + '">' + mediaHTML(p) +
+        '<span class="tag-sample">Demo discount</span>' +
+        '<span class="deal-ribbon">' + p.discount + '% OFF</span></div>' +
+      '<div class="card-body">' +
+        '<span class="cat-label">' + esc(CAT_BY_KEY[p.cat].label) + '</span>' +
+        '<h3>' + esc(p.name) + '</h3>' +
+        '<div class="price-row"><span class="price">' + fmt(p.lowest.p) + '</span><span class="price-old">' + fmt(p.mrp) + '</span><span class="off">' + p.discount + '% off</span></div>' +
+        '<span class="lowest-note">Sample price at ' + esc(p.lowest.r) + ' • sample list price shown struck through</span>' +
+        '<div class="card-actions"><button type="button" class="btn btn-primary btn-sm" data-compare="' + p.id + '">View Deal</button></div>' +
+      '</div></article>';
+  }
+
+  function renderDeals() {
+    var top = getProducts().slice().sort(function (a, b) { return b.discount - a.discount; }).slice(0, 4);
+    $('#dealGrid').innerHTML = top.map(dealCard).join('');
+  }
+
+  /* ---------- 6. SEARCH + FILTERING ---------- */
+  function normalise(q) { return q.toLowerCase().replace(/[^a-z0-9\s."-]/g, ' ').trim(); }
+
+  function matches(p, q) {
+    if (!q) return true;
+    var tokens = normalise(q).split(/\s+/).filter(Boolean);
+    return tokens.every(function (t) {
+      // match at the START of a word, so "phone" does not match "headphones"
+      var re = new RegExp('(^|[^a-z0-9])' + t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+      if (re.test(p.hay)) return true;
+      var syn = SYNONYMS[t];
+      return !!(syn && p.cat === syn);
+    });
+  }
+
+  function getResults() {
+    var list = getProducts().filter(function (p) {
+      return (state.cat === 'all' || p.cat === state.cat) && matches(p, state.query);
+    });
+    switch (state.sort) {
+      case 'price-asc':  list.sort(function (a, b) { return a.lowest.p - b.lowest.p; }); break;
+      case 'price-desc': list.sort(function (a, b) { return b.lowest.p - a.lowest.p; }); break;
+      case 'rating':     list.sort(function (a, b) { return b.rating - a.rating; }); break;
+      case 'discount':   list.sort(function (a, b) { return b.discount - a.discount; }); break;
+    }
+    return list;
+  }
+
+  function renderProducts() {
+    var list = getResults(), grid = $('#productGrid'), info = $('#resultsInfo');
+    var q = state.query.trim(), catLabel = state.cat === 'all' ? '' : CAT_BY_KEY[state.cat].label;
+
+    if (!list.length) {
+      grid.innerHTML = '<div class="empty"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.500-3.500M8.500 11h5"/></svg>' +
+        '<h3>No products found</h3><p>' + (q ? 'We couldn’t find a sample product matching “' + esc(q) + '”' + (catLabel ? ' in ' + esc(catLabel) : '') + '. ' : 'Nothing to show for this filter. ') +
+        'Try a different word such as “phone”, “laptop” or “tv”, or browse all categories.</p>' +
+        '<button type="button" class="btn btn-primary" data-reset="1">Clear search &amp; filters</button></div>';
+      info.innerHTML = '';
+    } else {
+      grid.innerHTML = list.map(productCard).join('');
+      var bits = list.length + (list.length === 1 ? ' product' : ' products');
+      if (q) bits += ' for “' + esc(q) + '”';
+      if (catLabel) bits += ' in ' + esc(catLabel);
+      info.innerHTML = '<span>Showing ' + bits + '</span>' + ((q || catLabel) ? '<button type="button" class="link-btn" data-reset="1">Clear search &amp; filters</button>' : '');
+    }
+    syncCategoryUI();
+    attachImageFallbacks();
+    observeReveals();
+    refreshWatchUI();
+  }
+
+  /* If a (future) external product image fails, swap in the SVG placeholder */
+  function attachImageFallbacks() {
+    $$('img[data-fallback]').forEach(function (img) {
+      img.addEventListener('error', function () {
+        var card = img.closest('.card'); var p = byId(card.dataset.id);
+        img.outerHTML = catIcon(p.cat, 'vis');
+      }, { once: true });
+    });
+  }
+
+  function setQuery(q) {
+    state.query = q;
+    var input = $('#searchInput');
+    if (input.value !== q) input.value = q;
+    $('#searchClear').classList.toggle('show', !!q);
+    renderProducts();
+  }
+  function resetAll() {
+    state.cat = 'all'; state.sort = 'relevance'; $('#sortSelect').value = 'relevance';
+    setQuery('');
+  }
+  function scrollToProducts() {
+    var el = $('#products'); if (!el) return;
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    el.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+  }
+
+  /* ---------- 7. LAYER MANAGER (modal + drawer) ---------- */
+  var layer = { el: null, trigger: null };
+  var FOCUSABLE = 'a[href],button:not([disabled]),input,select,textarea,[tabindex]:not([tabindex="-1"])';
+
+  function openLayer(el, trigger) {
+    if (layer.el) closeLayer(true);
+    layer.el = el; layer.trigger = trigger || document.activeElement;
+    $('#overlay').classList.add('open');
+    el.classList.add('open');
+    document.body.classList.add('no-scroll');
+    var first = $$(FOCUSABLE, el)[0];
+    setTimeout(function () { (first || el).focus(); }, 30);
+  }
+  function closeLayer(silent) {
+    if (!layer.el) return;
+    layer.el.classList.remove('open');
+    $('#overlay').classList.remove('open');
+    document.body.classList.remove('no-scroll');
+    var t = layer.trigger; layer.el = null; layer.trigger = null;
+    if (!silent && t && document.contains(t)) t.focus();
+  }
+
+  /* Compare modal */
+  function openCompare(id, trigger) {
+    var p = byId(id); if (!p) return;
+    var offers = p.offers.slice().sort(function (a, b) {
+      var ao = a.a === 'Out of stock' ? 1 : 0, bo = b.a === 'Out of stock' ? 1 : 0;
+      return ao - bo || a.p - b.p;
+    });
+    var highest = Math.max.apply(null, p.offers.map(function (o) { return o.p; }));
+    var anyLink = false;
+
+    var rows = offers.map(function (o) {
+      var isBest = o.r === p.lowest.r && o.p === p.lowest.p;
+      var url = offerUrl(o); if (url) anyLink = true;
+      return '<li class="offer' + (isBest ? ' best' : '') + (o.a === 'Out of stock' ? ' oos' : '') + '">' +
+        '<span class="dot" style="background:' + retailerColor(o.r) + '" aria-hidden="true">' + esc(o.r.charAt(0)) + '</span>' +
+        '<div><b>' + esc(o.r) + '</b><small>' + esc(o.d) + '</small><small class="' + availClass(o.a) + '">' + esc(o.a) + '</small></div>' +
+        '<div class="offer-right">' + (isBest ? '<span class="best-tag">Lowest sample price</span><br>' : '') +
+          '<span class="p">' + fmt(o.p) + '</span>' +
+          (isBest && highest > o.p ? '<small style="display:block;color:var(--ink-mute)">' + fmt(highest - o.p) + ' below highest sample offer</small>' : '') +
+          (url ? '<br><a class="btn btn-primary btn-sm" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer sponsored">Visit Store</a>' : '') +
+        '</div></li>';
+    }).join('');
+
+    var m = $('#compareModal');
+    m.innerHTML =
+      '<div class="modal-head">' +
+        '<div class="modal-thumb" style="' + tileStyle(p.cat) + '">' + catIcon(p.cat) + '</div>' +
+        '<div><span class="cat-label">' + esc(CAT_BY_KEY[p.cat].label) + '</span><h2 id="modalTitle">' + esc(p.name) + '</h2>' +
+        '<div class="rating">' + STAR + '<b>' + p.rating.toFixed(1) + '</b><span>(' + esc(p.reviews) + ' sample ratings)</span></div></div>' +
+        '<button type="button" class="modal-close" data-close aria-label="Close comparison">×</button>' +
+      '</div>' +
+      '<div class="modal-body">' +
+        '<span class="sample-pill">Sample demo offers – not live prices</span>' +
+        '<ul class="offers" aria-label="Sample offers for ' + esc(p.name) + '">' + rows + '</ul>' +
+        '<div class="modal-foot">' +
+          '<button type="button" class="btn btn-soft" data-modal-watch="' + p.id + '">' + (inWatch(p.id) ? '♥ In watchlist – remove' : '♡ Add to watchlist') + '</button>' +
+          '<button type="button" class="btn btn-ghost" data-close>Close</button>' +
+        '</div>' +
+        '<p class="fine">Sample list price: ' + fmt(p.mrp) + '. Prices, delivery details and availability above are invented for demonstration and may not match any real retailer. ' +
+          (anyLink ? '' : 'Store links are not configured in this demo, so no “Visit Store” buttons are shown.') + '</p>' +
+      '</div>';
+    openLayer(m, trigger);
+  }
+
+  /* Watchlist drawer */
+  function renderDrawer() {
+    var body = $('#drawerBody'), foot = $('#drawerFoot');
+    if (!state.watch.length) {
+      body.innerHTML = '<div class="empty" style="border:0;padding:40px 10px"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.500-4.600-9.300-9.200C1.400 8.400 3.400 5 6.800 5c2 0 3.400 1.100 5.200 3 1.800-1.900 3.200-3 5.200-3 3.400 0 5.400 3.400 4.100 6.800C19.500 16.400 12 21 12 21z"/></svg>' +
+        '<h3>Your watchlist is empty</h3><p>Tap the heart on any product to save it here.</p>' +
+        '<button type="button" class="btn btn-primary" data-close data-goto-products="1">Browse products</button></div>';
+      foot.innerHTML = '';
+      return;
+    }
+    body.innerHTML = state.watch.map(function (id) {
+      var p = byId(id);
+      return '<div class="wl-item"><div class="wl-thumb" style="' + tileStyle(p.cat) + '">' + catIcon(p.cat) + '</div><div>' +
+        '<h3>' + esc(p.name) + '</h3><div class="meta">' + esc(CAT_BY_KEY[p.cat].label) + ' • from ' + fmt(p.lowest.p) + ' <em>(sample)</em></div>' +
+        '<div class="row"><button type="button" class="btn btn-soft btn-sm" data-compare="' + p.id + '">Compare</button>' +
+        '<button type="button" class="btn btn-ghost btn-sm" data-remove="' + p.id + '" aria-label="Remove ' + esc(p.name) + ' from watchlist">Remove</button></div></div></div>';
+    }).join('');
+    foot.innerHTML = '<button type="button" class="btn btn-ghost btn-sm" data-clear-watch>Clear watchlist</button>' +
+      '<p>Saved only in this browser. Price-drop alerts are not available in this demo.</p>';
+  }
+
+  /* ---------- 8. EVENT WIRING ---------- */
+  function setMenu(open) {
+    $('#mainNav').classList.toggle('open', open);
+    var t = $('#menuToggle');
+    t.setAttribute('aria-expanded', open ? 'true' : 'false');
+    t.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    $('#menuIcon').innerHTML = open ? '<path d="M6 6l12 12M18 6L6 18"/>' : '<path d="M4 7h16M4 12h16M4 17h16"/>';
+  }
+
+  function init() {
+    renderCategories();
+    renderDeals();
+    renderProducts();
+    $('#year').textContent = new Date().getFullYear();
+
+    /* Search form */
+    $('#searchForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      state.cat = 'all';
+      setQuery($('#searchInput').value);
+      scrollToProducts();
+    });
+    $('#searchInput').addEventListener('input', function (e) { setQuery(e.target.value); });
+    $('#searchClear').addEventListener('click', function () { setQuery(''); $('#searchInput').focus(); });
+
+    /* Header search icon → focus the main search box */
+    $('#headerSearchBtn').addEventListener('click', function () {
+      var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      $('#home').scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' });
+      setMenu(false);
+      setTimeout(function () { $('#searchInput').focus({ preventScroll: true }); }, reduce ? 0 : 450);
+    });
+
+    /* Sort */
+    $('#sortSelect').addEventListener('change', function (e) { state.sort = e.target.value; renderProducts(); });
+
+    /* Mobile menu */
+    $('#menuToggle').addEventListener('click', function () { setMenu(!$('#mainNav').classList.contains('open')); });
+    $$('#mainNav a').forEach(function (a) { a.addEventListener('click', function () { setMenu(false); }); });
+
+    /* Watchlist drawer open/close */
+    $('#watchBtn').addEventListener('click', function (e) { renderDrawer(); openLayer($('#watchDrawer'), e.currentTarget); });
+    $('#drawerClose').addEventListener('click', function () { closeLayer(); });
+    $('#overlay').addEventListener('click', function () { closeLayer(); });
+
+    /* Delegated clicks for everything dynamic */
+    document.addEventListener('click', function (e) {
+      var t = e.target;
+
+      var chipSearch = t.closest('[data-search]');
+      if (chipSearch) { state.cat = 'all'; setQuery(chipSearch.dataset.search); scrollToProducts(); return; }
+
+      var cat = t.closest('[data-cat]');
+      if (cat) { state.cat = state.cat === cat.dataset.cat ? 'all' : cat.dataset.cat; setQuery(''); scrollToProducts(); return; }
+
+      var chip = t.closest('[data-chip]');
+      if (chip) { state.cat = chip.dataset.chip; renderProducts(); return; }
+
+      var foot = t.closest('[data-footcat]');
+      if (foot) { state.cat = foot.dataset.footcat; setQuery(''); return; } /* anchor handles scroll */
+
+      var cmp = t.closest('[data-compare]');
+      if (cmp) { var trig = cmp; if (layer.el === $('#watchDrawer')) trig = $('#watchBtn'); openCompare(cmp.dataset.compare, trig); return; }
+
+      var wl = t.closest('.wl-btn');
+      if (wl) { toggleWatch(wl.dataset.id); return; }
+
+      var mw = t.closest('[data-modal-watch]');
+      if (mw) { toggleWatch(mw.dataset.modalWatch); return; }
+
+      var rm = t.closest('[data-remove]');
+      if (rm) { toggleWatch(rm.dataset.remove); return; }
+
+      if (t.closest('[data-clear-watch]')) {
+        state.watch = []; saveWatch(); refreshWatchUI(); toast('Watchlist cleared'); return;
+      }
+      if (t.closest('[data-reset]')) { resetAll(); return; }
+
+      if (t.closest('[data-close]')) {
+        var goto = t.closest('[data-goto-products]');
+        closeLayer(); if (goto) scrollToProducts(); return;
+      }
+
+      var ph = t.closest('[data-placeholder]');
+      if (ph) { e.preventDefault(); toast(ph.dataset.placeholder + ' is a placeholder in this demo.'); return; }
+    });
+
+    /* Keyboard: Esc closes layers/menu; Tab is trapped inside an open layer */
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        if (layer.el) { closeLayer(); return; }
+        if ($('#mainNav').classList.contains('open')) { setMenu(false); $('#menuToggle').focus(); }
+      }
+      if (e.key === 'Tab' && layer.el) {
+        var f = $$(FOCUSABLE, layer.el).filter(function (n) { return n.offsetParent !== null; });
+        if (!f.length) { e.preventDefault(); return; }
+        var first = f[0], last = f[f.length - 1];
+        if (e.shiftKey && (document.activeElement === first || document.activeElement === layer.el)) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    });
+
+    /* Sticky header shadow + active nav link on scroll */
+    var header = $('#siteHeader');
+    var sections = ['home', 'categories', 'deals', 'how-it-works'].map(function (id) { return document.getElementById(id); });
+    var links = $$('.nav-list a');
+    function onScroll() {
+      header.classList.toggle('scrolled', window.scrollY > 8);
+      var y = window.scrollY + 140, current = 'home';
+      sections.forEach(function (s) { if (s && s.offsetTop <= y) current = s.id; });
+      if (document.getElementById('products').offsetTop <= y && document.getElementById('deals').offsetTop > y) current = 'categories';
+      links.forEach(function (a) { a.classList.toggle('active', a.getAttribute('href') === '#' + current); });
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+
+    /* Close mobile menu when resizing to desktop */
+    window.addEventListener('resize', function () { if (window.innerWidth > 860) setMenu(false); });
+
+    observeReveals();
+  }
+
+  /* Scroll-reveal animation (disabled via CSS for reduced-motion users) */
+  var io = null;
+  function observeReveals() {
+    var items = $$('.reveal:not(.in)');
+    if (!('IntersectionObserver' in window)) { items.forEach(function (n) { n.classList.add('in'); }); return; }
+    if (!io) {
+      io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); } });
+      }, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
+    }
+    items.forEach(function (n) { io.observe(n); });
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+
+  /* Small debugging/extension surface (no side effects) */
+  window.ValueD = { getProducts: getProducts, state: state, fmt: fmt };
+})();
+</script>
+</body>
+</html>
