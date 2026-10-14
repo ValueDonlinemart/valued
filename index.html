@@ -6,25 +6,61 @@
 <title>ValueD – Compare Smart. Buy Better.</title>
 <meta name="description" content="ValueD is a shopping research demo for India. Browse sample product offers, compare sample prices and keep a personal watchlist. All prices shown are sample demo data.">
 <meta name="theme-color" content="#0e8a4f">
-<!-- Inline SVG favicon (no external files needed) -->
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%230e8a4f'/%3E%3Cpath d='M14 20l13 28 13-28' fill='none' stroke='white' stroke-width='8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 
-<style>
-/* =====================================================================
-   ValueD – Compare Smart. Buy Better.
-   Single-file static frontend demo. All prices are SAMPLE DEMO DATA.
-   ===================================================================== */
+<!--
+=====================================================================
+ ValueD – Compare Smart. Buy Better.      (single-file static site)
+=====================================================================
+ HOW THIS FILE IS ORGANISED
+ Every part has a start comment and an end comment. To change one part,
+ search the file for its start line, replace everything down to the
+ matching end line, and leave the rest alone.
 
-/* ---------- 1. Design tokens ---------- */
+ The same section number is used in all three layers (NN = number):
+   HTML        start/end comments read   SECTION NN: NAME
+   CSS         start/end comments read   CSS SECTION NN: NAME
+   JavaScript  start/end comments read   JS SECTION NN: NAME
+ Search for e.g. "SECTION 06" to find the Deals HTML, CSS and JS.
+
+ SECTION MAP
+   01 Logo & Branding        (logo symbol, wordmark, brand colours, logo sizing)
+   02 Header & Navigation
+   03 Homepage               (demo banner, hero, search box)
+   04 Product Categories
+   05 Trending Products      (search + category filtering + product cards)
+   06 Deals Page             (discount cards + deal filters)
+   07 Product Comparison     (compare modal, retailer offer rows)
+   08 Watchlist              (add/remove, count, localStorage, drawer)
+   09 How It Works           (steps + "Why choose ValueD")
+   10 About Us
+   11 Contact Us             (validated form – delivery needs a service)
+   12 Privacy Policy         (DRAFT – needs business details + legal review)
+   13 Terms & Conditions     (DRAFT – needs business details + legal review)
+   14 Footer
+   15 CSS Design System      (shared styles; also the CSS "shared" block)
+   16 JavaScript             (shared data/helpers + one module per section)
+
+ SHARED CODE (change with care – other sections depend on it)
+   CSS  : SECTION 15 (buttons, chips, cards, overlay, toast, doc layout)
+   JS   : "JS SHARED A/B/C" blocks (data, helpers, events bus, layers)
+
+ NOTE: Section numbers 11–16 follow the latest brief (About 10,
+ Contact 11, Privacy 12, Terms 13, Footer 14, CSS 15, JS 16).
+=====================================================================
+-->
+
+<style>
+/* ===================================================================
+   START SECTION 15: CSS DESIGN SYSTEM (shared)
+   Loaded FIRST so section styles below can build on it.
+   Contains: neutral tokens, reset, typography, layout helpers,
+   buttons, chips, filter bar, generic product-card system, empty
+   state, overlay, toast, reveal animation, long-document layout,
+   reduced-motion rules.
+   Brand colours + logo sizing live in CSS SECTION 01.
+   =================================================================== */
 :root{
-  --green-950:#062a20;
-  --green-900:#0a3a2c;
-  --green-700:#0b7a46;
-  --green-600:#0e8a4f;
-  --green-500:#1fa855;
-  --green-400:#3fcb6b;
-  --green-100:#dff4e6;
-  --green-50:#f0faf3;
   --ink:#0d2620;
   --ink-soft:#4a5f58;
   --ink-mute:#7a8c85;
@@ -42,8 +78,6 @@
   --font:"Segoe UI",system-ui,-apple-system,"Helvetica Neue",Roboto,"Noto Sans",Arial,sans-serif;
   --ease:cubic-bezier(.22,.8,.3,1);
 }
-
-/* ---------- 2. Base ---------- */
 *,*::before,*::after{box-sizing:border-box}
 html{scroll-behavior:smooth;scroll-padding-top:calc(var(--header-h) + 12px);-webkit-text-size-adjust:100%}
 body{margin:0;font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1.55;-webkit-font-smoothing:antialiased}
@@ -53,14 +87,23 @@ button{font:inherit;color:inherit;cursor:pointer}
 a{color:inherit}
 h1,h2,h3,h4{line-height:1.15;margin:0;letter-spacing:-.02em}
 p{margin:0}
-ul{margin:0;padding:0;list-style:none}
+ul,ol{margin:0;padding:0;list-style:none}
 .container{width:min(1200px,100% - 40px);margin-inline:auto}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 :focus-visible{outline:3px solid var(--green-500);outline-offset:2px;border-radius:8px}
-.skip-link{position:absolute;left:12px;top:-60px;background:var(--green-900);color:#fff;padding:10px 16px;border-radius:10px;z-index:200;text-decoration:none;transition:top .2s}
-.skip-link:focus{top:12px}
 
-/* ---------- 3. Buttons ---------- */
+/* Page sections */
+section{padding:72px 0}
+.soft-bg{background:var(--bg-soft)}
+.section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:28px}
+.section-head h2{font-size:clamp(1.6rem,3.4vw,2.2rem);font-weight:800;color:var(--green-950)}
+.section-head p{color:var(--ink-soft);margin-top:6px;max-width:620px}
+.sample-pill{display:inline-flex;align-items:center;gap:6px;background:#fff7e6;color:#8a5a00;border:1px solid #ffe2a6;border-radius:999px;padding:5px 12px;font-size:.75rem;font-weight:700;letter-spacing:.02em;text-transform:uppercase}
+.notice{margin-top:30px;padding:18px 22px;border-radius:var(--radius-sm);background:#fff7e6;border:1px solid #ffe2a6;color:#6e4a07;font-size:.9rem}
+.link-btn{background:none;border:0;padding:0;color:var(--green-700);font-weight:700;text-decoration:underline;text-underline-offset:3px}
+.fill-in{background:#fff3c4;color:#6e4a07;padding:0 .35em;border-radius:5px;font-weight:650;white-space:normal}
+
+/* Buttons */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1.5px solid transparent;border-radius:999px;padding:12px 22px;font-weight:650;font-size:.95rem;text-decoration:none;transition:transform .2s var(--ease),box-shadow .2s,background .2s,color .2s,border-color .2s;white-space:nowrap}
 .btn:active{transform:scale(.97)}
 .btn-primary{background:linear-gradient(135deg,var(--green-500),var(--green-700));color:#fff;box-shadow:0 8px 20px rgba(14,138,79,.28)}
@@ -70,31 +113,171 @@ ul{margin:0;padding:0;list-style:none}
 .btn-soft{background:var(--green-50);color:var(--green-700);border-color:var(--green-100)}
 .btn-soft:hover{background:var(--green-100)}
 .btn-sm{padding:9px 16px;font-size:.85rem}
-.btn[disabled]{opacity:.5;cursor:not-allowed}
+.btn[disabled]{opacity:.55;cursor:not-allowed;transform:none}
+
+/* Chips + filter bar + sort (used by Sections 03, 05, 06) */
+.chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 14px;font-size:.85rem;font-weight:600;color:var(--ink-soft);transition:all .2s}
+.chip:hover{border-color:var(--green-500);color:var(--green-700);background:var(--green-50)}
+.chip.active{background:var(--green-600);border-color:var(--green-600);color:#fff}
+.chip-row{display:flex;flex-wrap:wrap;gap:8px}
+.filter-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px}
+.sort{display:flex;align-items:center;gap:8px;font-size:.88rem;color:var(--ink-soft);font-weight:600}
+.sort select{border:1.5px solid var(--line);border-radius:999px;padding:8px 14px;background:#fff;font:inherit;font-weight:600;color:var(--ink)}
+
+/* Generic product-card system (used by Sections 05 and 06) */
+.product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:20px}
+.card{position:relative;display:flex;flex-direction:column;background:#fff;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-sm);transition:transform .25s var(--ease),box-shadow .25s}
+.card:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+.card-media{position:relative;aspect-ratio:4/3;display:grid;place-items:center;background:linear-gradient(135deg,var(--tile-a,#eef8f1),var(--tile-b,#dff1e6))}
+.card-media svg.vis{width:42%;height:auto;max-height:70%;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 6px 10px rgba(0,0,0,.18))}
+.card-media img{width:100%;height:100%;object-fit:contain;padding:14px;background:#fff}
+.tag-sample{position:absolute;left:12px;top:12px;background:rgba(255,255,255,.92);color:#8a5a00;font-size:.62rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:4px 9px;border-radius:999px}
+.card-body{display:flex;flex-direction:column;gap:8px;padding:16px 16px 18px;flex:1}
+.cat-label{font-size:.75rem;font-weight:700;color:var(--green-700);text-transform:uppercase;letter-spacing:.06em}
+.card h3{font-size:1.02rem;font-weight:700;letter-spacing:-.01em}
+.rating{display:flex;align-items:center;gap:6px;font-size:.82rem;color:var(--ink-soft)}
+.rating svg{width:15px;height:15px;fill:var(--amber)}
+.price-row{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-top:2px}
+.price{font-size:1.4rem;font-weight:800;letter-spacing:-.02em}
+.lowest-note{font-size:.76rem;color:var(--ink-mute)}
+.card-actions{margin-top:auto;display:flex;gap:8px;padding-top:6px}
+.card-actions .btn{flex:1}
+
+/* Empty state (search with no results, empty watchlist) */
+.empty{grid-column:1/-1;text-align:center;padding:56px 20px;background:#fff;border:2px dashed var(--line);border-radius:var(--radius)}
+.empty svg{width:54px;height:54px;margin:0 auto 14px;stroke:var(--green-500);fill:none;stroke-width:1.8;stroke-linecap:round}
+.empty h3{font-size:1.3rem;margin-bottom:6px}
+.empty p{color:var(--ink-soft);margin-bottom:18px}
+
+/* Overlay + round close button (used by Sections 07 and 08) */
+.overlay{position:fixed;inset:0;background:rgba(6,42,32,.55);backdrop-filter:blur(3px);z-index:150;opacity:0;visibility:hidden;transition:opacity .25s,visibility .25s}
+.overlay.open{opacity:1;visibility:visible}
+.modal-close{margin-left:auto;align-self:flex-start;width:40px;height:40px;flex:none;border-radius:50%;border:1.5px solid var(--line);background:#fff;font-size:1.4rem;line-height:1}
+.modal-close:hover{background:var(--bg-soft)}
+
+/* Toast */
+.toast{position:fixed;left:50%;bottom:24px;z-index:300;transform:translate(-50%,30px);background:var(--green-950);color:#fff;padding:12px 20px;border-radius:999px;font-size:.9rem;font-weight:600;box-shadow:var(--shadow-lg);opacity:0;pointer-events:none;transition:opacity .25s,transform .3s var(--ease);max-width:calc(100% - 32px);text-align:center}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* Scroll reveal */
+.reveal{opacity:0;transform:translateY(22px);transition:opacity .6s var(--ease),transform .6s var(--ease)}
+.reveal.in{opacity:1;transform:none}
+
+/* Long-document layout (shared by Section 12 Privacy and Section 13 Terms) */
+.doc-layout{display:grid;grid-template-columns:260px minmax(0,1fr);gap:36px;align-items:start}
+.doc-toc{position:sticky;top:calc(var(--header-h) + 20px);background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow-sm)}
+.doc-toc h3{font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-mute);margin-bottom:10px}
+.doc-toc ol{counter-reset:toc}
+.doc-toc li{counter-increment:toc}
+.doc-toc a{display:flex;gap:10px;padding:7px 8px;border-radius:10px;text-decoration:none;font-size:.9rem;font-weight:600;color:var(--ink-soft)}
+.doc-toc a::before{content:counter(toc) ".";color:var(--green-600);font-weight:800;min-width:1.4em}
+.doc-toc a:hover{background:var(--green-50);color:var(--green-700)}
+.doc-body{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:36px;box-shadow:var(--shadow-sm);min-width:0}
+.doc-block+.doc-block{margin-top:30px;padding-top:30px;border-top:1px solid var(--line)}
+.doc-block h3{font-size:1.2rem;font-weight:800;margin-bottom:12px;color:var(--green-950)}
+.doc-block p{color:var(--ink-soft);margin-bottom:12px}
+.doc-block p:last-child{margin-bottom:0}
+.doc-block ul{display:grid;gap:8px;margin:0 0 12px;padding-left:4px}
+.doc-block li{position:relative;padding-left:22px;color:var(--ink-soft)}
+.doc-block li::before{content:"";position:absolute;left:4px;top:.62em;width:7px;height:7px;border-radius:50%;background:var(--green-500)}
+.doc-draft{margin:0 0 26px}
+@media (max-width:900px){
+  .doc-layout{grid-template-columns:minmax(0,1fr)}
+  .doc-toc{position:static}
+  .doc-toc ol{display:flex;flex-wrap:wrap;gap:4px 8px}
+}
+@media (max-width:560px){
+  section{padding:52px 0}
+  .doc-body{padding:24px 18px}
+  .sort{width:100%}
+  .sort select{flex:1}
+}
+
+/* Reduced-motion: applies to the whole site */
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  .reveal{opacity:1;transform:none}
+}
+/* END SECTION 15: CSS DESIGN SYSTEM (shared) */
+
+
+/* ===================================================================
+   START CSS SECTION 01: LOGO & BRANDING
+   Brand colours, logo sizing and wordmark styling.
+   The logo drawing itself is the symbol "vd-logo-mark" in HTML
+   SECTION 01; the lockup (mark + wordmark + tagline) is the
+   template "vd-lockup-template" in HTML SECTION 01.
+   =================================================================== */
+:root{
+  /* Brand colours */
+  --green-950:#062a20;
+  --green-900:#0a3a2c;
+  --green-700:#0b7a46;
+  --green-600:#0e8a4f;
+  --green-500:#1fa855;
+  --green-400:#3fcb6b;
+  --green-100:#dff4e6;
+  --green-50:#f0faf3;
+  /* Logo sizing (change these to resize the logo everywhere) */
+  --logo-mark-w:52px;
+  --logo-mark-h:44px;
+  --logo-name-size:1.65rem;
+}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+.brand-mark{width:var(--logo-mark-w);height:var(--logo-mark-h);color:var(--green-900)}
+.brand-text{display:flex;flex-direction:column;line-height:1}
+.brand-name{font-size:var(--logo-name-size);font-weight:800;color:var(--green-950);letter-spacing:-.04em}
+.brand-name b{color:var(--green-500);font-weight:800}
+.brand-tag{font-size:.66rem;color:var(--ink-soft);margin-top:4px;letter-spacing:.01em}
+/* Light-on-dark variant (used in the footer) */
+.brand--on-dark .brand-mark{color:#d7efe1}
+.brand--on-dark .brand-name{color:#fff}
+.brand--on-dark .brand-tag{color:#9cc0ae}
+@media (max-width:560px){
+  :root{--logo-mark-w:44px;--logo-mark-h:38px;--logo-name-size:1.4rem}
+  .brand-tag{display:none}
+}
+/* END CSS SECTION 01: LOGO & BRANDING */
+
+
+/* ===================================================================
+   START CSS SECTION 02: HEADER & NAVIGATION
+   =================================================================== */
+.skip-link{position:absolute;left:12px;top:-60px;background:var(--green-900);color:#fff;padding:10px 16px;border-radius:10px;z-index:200;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:12px}
+.site-header{position:sticky;top:0;z-index:100;height:var(--header-h);background:rgba(255,255,255,.86);backdrop-filter:saturate(1.4) blur(14px);-webkit-backdrop-filter:saturate(1.4) blur(14px);border-bottom:1px solid transparent;transition:box-shadow .25s,border-color .25s}
+.site-header.scrolled{box-shadow:0 4px 20px rgba(10,58,44,.08);border-color:var(--line)}
+.header-inner{height:100%;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.nav-list{display:flex;align-items:center;gap:6px}
+.nav-list a{display:block;padding:9px 16px;border-radius:999px;text-decoration:none;font-weight:600;font-size:.95rem;color:var(--ink-soft);transition:background .2s,color .2s}
+.nav-list a:hover,.nav-list a.active{color:var(--green-700);background:var(--green-50)}
+.header-actions{display:flex;align-items:center;gap:10px}
 .icon-btn{position:relative;width:44px;height:44px;border-radius:50%;border:1.5px solid var(--line);background:#fff;display:inline-grid;place-items:center;transition:border-color .2s,background .2s,transform .2s}
 .icon-btn:hover{border-color:var(--green-500);background:var(--green-50)}
 .icon-btn svg{width:21px;height:21px;stroke:var(--ink);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .badge-count{position:absolute;top:-4px;right:-4px;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:var(--green-600);color:#fff;font-size:.72rem;font-weight:700;display:grid;place-items:center;border:2px solid #fff}
 .badge-count.bump{animation:bump .4s var(--ease)}
 @keyframes bump{50%{transform:scale(1.35)}}
-
-/* ---------- 4. Header ---------- */
-.site-header{position:sticky;top:0;z-index:100;height:var(--header-h);background:rgba(255,255,255,.86);backdrop-filter:saturate(1.4) blur(14px);-webkit-backdrop-filter:saturate(1.4) blur(14px);border-bottom:1px solid transparent;transition:box-shadow .25s,border-color .25s}
-.site-header.scrolled{box-shadow:0 4px 20px rgba(10,58,44,.08);border-color:var(--line)}
-.header-inner{height:100%;display:flex;align-items:center;justify-content:space-between;gap:20px}
-.brand{display:flex;align-items:center;gap:10px;text-decoration:none}
-.brand-mark{width:52px;height:44px}
-.brand-text{display:flex;flex-direction:column;line-height:1}
-.brand-name{font-size:1.65rem;font-weight:800;color:var(--green-950);letter-spacing:-.04em}
-.brand-name b{color:var(--green-500);font-weight:800}
-.brand-tag{font-size:.66rem;color:var(--ink-soft);margin-top:4px;letter-spacing:.01em}
-.nav-list{display:flex;align-items:center;gap:6px}
-.nav-list a{display:block;padding:9px 16px;border-radius:999px;text-decoration:none;font-weight:600;font-size:.95rem;color:var(--ink-soft);transition:background .2s,color .2s}
-.nav-list a:hover,.nav-list a.active{color:var(--green-700);background:var(--green-50)}
-.header-actions{display:flex;align-items:center;gap:10px}
 .menu-toggle{display:none}
+@media (max-width:860px){
+  .menu-toggle{display:inline-grid}
+  .main-nav{position:absolute;left:0;right:0;top:var(--header-h);background:#fff;border-bottom:1px solid var(--line);box-shadow:0 20px 30px rgba(10,58,44,.1);padding:10px 20px 18px;display:none}
+  .main-nav.open{display:block;animation:drop .25s var(--ease)}
+  .nav-list{flex-direction:column;align-items:stretch;gap:2px}
+  .nav-list a{padding:14px 16px;font-size:1rem}
+}
+@keyframes drop{from{opacity:0;transform:translateY(-8px)}}
+@media (max-width:560px){:root{--header-h:64px}}
+/* END CSS SECTION 02: HEADER & NAVIGATION */
 
-/* ---------- 5. Hero ---------- */
+
+/* ===================================================================
+   START CSS SECTION 03: HOMEPAGE
+   Demo banner + hero + search box + hero visual.
+   =================================================================== */
+.demo-banner{background:var(--green-950);color:#d7efe1;font-size:.84rem;text-align:center;padding:9px 16px}
+.demo-banner b{color:#fff}
 .hero{position:relative;overflow:hidden;background:radial-gradient(1000px 500px at 85% 0%,#d4f1de 0%,transparent 60%),radial-gradient(700px 400px at 0% 100%,#e7f7ed 0%,transparent 60%),linear-gradient(180deg,#f2fbf5,#fff);padding:56px 0 72px}
 .hero-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:40px;align-items:center}
 .hero-grid>*{min-width:0}
@@ -113,12 +296,7 @@ ul{margin:0;padding:0;list-style:none}
 .search-clear:hover{background:var(--green-100)}
 .popular{margin-top:18px;display:flex;flex-wrap:wrap;align-items:center;gap:8px}
 .popular>span{font-size:.88rem;font-weight:650;color:var(--ink-soft);margin-right:2px}
-.chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 14px;font-size:.85rem;font-weight:600;color:var(--ink-soft);transition:all .2s}
-.chip:hover{border-color:var(--green-500);color:var(--green-700);background:var(--green-50)}
-.chip.active{background:var(--green-600);border-color:var(--green-600);color:#fff}
 .hero-cta{margin-top:26px;display:flex;flex-wrap:wrap;gap:12px}
-
-/* Hero visual: sample phone with sample offers */
 .hero-visual{position:relative;display:grid;place-items:center;min-height:430px}
 .blob{position:absolute;inset:6% 4%;background:radial-gradient(circle at 40% 40%,#c9efd6,#e9f8ee 60%,transparent 70%);border-radius:50%;filter:blur(2px)}
 .phone{position:relative;width:min(290px,70%);background:#10231d;border-radius:42px;padding:11px;box-shadow:var(--shadow-lg);transform:rotate(4deg);animation:float 6s ease-in-out infinite}
@@ -133,27 +311,30 @@ ul{margin:0;padding:0;list-style:none}
 .ph-offer.best{border-color:var(--green-500);background:var(--green-50)}
 .ph-offer .dot{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;font-weight:800;font-size:.72rem;color:#fff;flex:none}
 .ph-offer .name{flex:1;font-weight:650}
-.ph-offer .price{font-weight:800}
+.ph-offer .price{font-weight:800;font-size:inherit;letter-spacing:0}
 .ph-offer .tag{display:block;font-size:.62rem;color:var(--green-700);font-weight:700}
 .float-badge{position:absolute;right:0;top:12%;background:linear-gradient(135deg,var(--green-600),var(--green-700));color:#fff;border-radius:18px;padding:14px 18px;box-shadow:var(--shadow-lg);transform:rotate(-5deg);animation:float 5s ease-in-out infinite reverse}
 .float-badge small{display:block;font-size:.72rem;opacity:.85}
 .float-badge b{font-size:1.5rem;letter-spacing:-.02em}
 .float-badge em{display:block;font-style:normal;font-size:.62rem;opacity:.8;margin-top:2px}
 @keyframes float{50%{translate:0 -10px}}
+@media (max-width:1024px){
+  .hero-grid{grid-template-columns:minmax(0,1fr);gap:24px}
+  .hero-visual{min-height:380px}
+}
+@media (max-width:560px){
+  .hero{padding:36px 0 52px}
+  .search-box{padding-left:14px}
+  .search-box .btn{padding:12px 16px}
+  .float-badge{right:0;top:4%;transform:rotate(-5deg) scale(.8)}
+  .phone{width:min(260px,72%)}
+}
+/* END CSS SECTION 03: HOMEPAGE */
 
-/* ---------- 6. Demo banner ---------- */
-.demo-banner{background:var(--green-950);color:#d7efe1;font-size:.84rem;text-align:center;padding:9px 16px}
-.demo-banner b{color:#fff}
 
-/* ---------- 7. Sections ---------- */
-section{padding:72px 0}
-.section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:28px}
-.section-head h2{font-size:clamp(1.6rem,3.4vw,2.2rem);font-weight:800;color:var(--green-950)}
-.section-head p{color:var(--ink-soft);margin-top:6px;max-width:620px}
-.sample-pill{display:inline-flex;align-items:center;gap:6px;background:#fff7e6;color:#8a5a00;border:1px solid #ffe2a6;border-radius:999px;padding:5px 12px;font-size:.75rem;font-weight:700;letter-spacing:.02em;text-transform:uppercase}
-.soft-bg{background:var(--bg-soft)}
-
-/* Categories */
+/* ===================================================================
+   START CSS SECTION 04: PRODUCT CATEGORIES
+   =================================================================== */
 .cat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
 .cat-card{display:flex;flex-direction:column;align-items:center;gap:14px;padding:24px 12px 20px;background:#fff;border:1.5px solid var(--line);border-radius:var(--radius);font-weight:650;transition:transform .25s var(--ease),box-shadow .25s,border-color .25s}
 .cat-card:hover{transform:translateY(-5px);box-shadow:var(--shadow);border-color:var(--green-400)}
@@ -162,94 +343,42 @@ section{padding:72px 0}
 .cat-card:hover .cat-icon{transform:scale(1.08) rotate(-4deg)}
 .cat-icon svg{width:38px;height:38px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 .cat-card small{font-weight:500;color:var(--ink-mute);margin-top:-8px}
+@media (max-width:860px){.cat-grid{grid-template-columns:repeat(2,1fr)}}
+/* END CSS SECTION 04: PRODUCT CATEGORIES */
 
-/* Filter bar */
-.filter-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px}
-.chip-row{display:flex;flex-wrap:wrap;gap:8px}
-.sort{display:flex;align-items:center;gap:8px;font-size:.88rem;color:var(--ink-soft);font-weight:600}
-.sort select{border:1.5px solid var(--line);border-radius:999px;padding:8px 14px;background:#fff;font:inherit;font-weight:600;color:var(--ink)}
+
+/* ===================================================================
+   START CSS SECTION 05: TRENDING PRODUCTS
+   Card basics are in Section 15; only trending-specific parts here.
+   =================================================================== */
 .results-info{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px;color:var(--ink-soft);font-size:.95rem;min-height:30px}
-.link-btn{background:none;border:0;padding:0;color:var(--green-700);font-weight:700;text-decoration:underline;text-underline-offset:3px}
-
-/* Product cards */
-.product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:20px}
-.card{position:relative;display:flex;flex-direction:column;background:#fff;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-sm);transition:transform .25s var(--ease),box-shadow .25s}
-.card:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
-.card-media{position:relative;aspect-ratio:4/3;display:grid;place-items:center;background:linear-gradient(135deg,var(--tile-a,#eef8f1),var(--tile-b,#dff1e6))}
-.card-media svg.vis{width:42%;height:auto;max-height:70%;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 6px 10px rgba(0,0,0,.18))}
-.card-media img{width:100%;height:100%;object-fit:contain;padding:14px;background:#fff}
-.tag-sample{position:absolute;left:12px;top:12px;background:rgba(255,255,255,.92);color:#8a5a00;font-size:.62rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:4px 9px;border-radius:999px}
-.wl-btn{position:absolute;right:10px;top:10px;width:38px;height:38px;border-radius:50%;border:0;background:rgba(255,255,255,.95);display:grid;place-items:center;box-shadow:var(--shadow-sm);transition:transform .2s var(--ease)}
-.wl-btn:hover{transform:scale(1.1)}
-.wl-btn svg{width:20px;height:20px;fill:none;stroke:var(--ink-soft);stroke-width:2;stroke-linejoin:round}
-.wl-btn[aria-pressed="true"] svg{fill:var(--red);stroke:var(--red)}
-.card-body{display:flex;flex-direction:column;gap:8px;padding:16px 16px 18px;flex:1}
-.cat-label{font-size:.75rem;font-weight:700;color:var(--green-700);text-transform:uppercase;letter-spacing:.06em}
-.card h3{font-size:1.02rem;font-weight:700;letter-spacing:-.01em}
-.rating{display:flex;align-items:center;gap:6px;font-size:.82rem;color:var(--ink-soft)}
-.rating svg{width:15px;height:15px;fill:var(--amber)}
-.price-row{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-top:2px}
-.price{font-size:1.4rem;font-weight:800;letter-spacing:-.02em}
-.price-old{color:var(--ink-mute);text-decoration:line-through;font-size:.9rem}
-.off{background:var(--green-100);color:var(--green-700);font-size:.74rem;font-weight:800;padding:3px 8px;border-radius:8px}
-.lowest-note{font-size:.76rem;color:var(--ink-mute)}
 .offer-mini{display:flex;flex-direction:column;gap:5px;margin:6px 0 4px;padding:10px 12px;background:var(--bg-soft);border-radius:12px;font-size:.8rem}
 .offer-mini li{display:flex;justify-content:space-between;gap:8px;color:var(--ink-soft)}
 .offer-mini li.low{color:var(--green-700);font-weight:700}
-.card-actions{margin-top:auto;display:flex;gap:8px;padding-top:6px}
-.card-actions .btn{flex:1}
+/* END CSS SECTION 05: TRENDING PRODUCTS */
 
-/* Empty state */
-.empty{grid-column:1/-1;text-align:center;padding:56px 20px;background:#fff;border:2px dashed var(--line);border-radius:var(--radius)}
-.empty svg{width:54px;height:54px;margin:0 auto 14px;stroke:var(--green-500);fill:none;stroke-width:1.8;stroke-linecap:round}
-.empty h3{font-size:1.3rem;margin-bottom:6px}
-.empty p{color:var(--ink-soft);margin-bottom:18px}
 
-/* Deals */
+/* ===================================================================
+   START CSS SECTION 06: DEALS PAGE
+   =================================================================== */
 .deal-card .card-media{aspect-ratio:16/10}
 .deal-ribbon{position:absolute;right:0;bottom:0;background:var(--green-600);color:#fff;font-weight:800;font-size:.9rem;padding:6px 14px;border-radius:14px 0 0 0}
+.price-old{color:var(--ink-mute);text-decoration:line-through;font-size:.9rem}
+.off{background:var(--green-100);color:var(--green-700);font-size:.74rem;font-weight:800;padding:3px 8px;border-radius:8px}
+.deal-foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-top:22px;color:var(--ink-soft);font-size:.92rem}
+/* END CSS SECTION 06: DEALS PAGE */
 
-/* How it works */
-.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;counter-reset:step}
-.step{position:relative;background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:30px 26px;box-shadow:var(--shadow-sm)}
-.step-num{width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,var(--green-500),var(--green-700));color:#fff;font-weight:800;font-size:1.2rem;display:grid;place-items:center;margin-bottom:18px}
-.step h3{font-size:1.2rem;margin-bottom:8px}
-.step p{color:var(--ink-soft)}
-.step:not(:last-child)::after{content:"";position:absolute;right:-17px;top:52px;width:12px;height:12px;border-top:3px solid var(--green-400);border-right:3px solid var(--green-400);transform:rotate(45deg)}
 
-/* Why ValueD */
-.why-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
-.why{padding:28px 24px;border-radius:var(--radius);background:linear-gradient(160deg,#fff,var(--green-50));border:1px solid var(--green-100);transition:transform .25s var(--ease),box-shadow .25s}
-.why:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
-.why-icon{width:52px;height:52px;border-radius:16px;background:var(--green-600);color:#fff;display:grid;place-items:center;margin-bottom:16px}
-.why-icon svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.why h3{font-size:1.08rem;margin-bottom:8px}
-.why p{color:var(--ink-soft);font-size:.94rem}
-.notice{margin-top:30px;padding:18px 22px;border-radius:var(--radius-sm);background:#fff7e6;border:1px solid #ffe2a6;color:#6e4a07;font-size:.9rem}
-
-/* Footer */
-.site-footer{background:var(--green-950);color:#bcd5c8;padding:60px 0 28px}
-.footer-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1.2fr;gap:36px}
-.site-footer .brand-name{color:#fff}
-.site-footer .brand-tag{color:#9cc0ae}
-.site-footer p{font-size:.92rem;margin-top:14px;max-width:320px}
-.site-footer h4{color:#fff;font-size:1rem;margin-bottom:14px;letter-spacing:0}
-.site-footer li{margin-bottom:9px}
-.site-footer a{text-decoration:none;font-size:.93rem;transition:color .2s}
-.site-footer a:hover{color:#fff;text-decoration:underline}
-.footer-bottom{margin-top:44px;padding-top:22px;border-top:1px solid rgba(255,255,255,.12);display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;font-size:.84rem;color:#8fb3a1}
-
-/* ---------- 8. Overlay, modal, drawer ---------- */
-.overlay{position:fixed;inset:0;background:rgba(6,42,32,.55);backdrop-filter:blur(3px);z-index:150;opacity:0;visibility:hidden;transition:opacity .25s,visibility .25s}
-.overlay.open{opacity:1;visibility:visible}
+/* ===================================================================
+   START CSS SECTION 07: PRODUCT COMPARISON
+   Compare modal and retailer offer rows.
+   =================================================================== */
 .modal{position:fixed;z-index:160;left:50%;top:50%;width:min(680px,100% - 24px);max-height:calc(100dvh - 24px);overflow:auto;background:#fff;border-radius:24px;box-shadow:var(--shadow-lg);transform:translate(-50%,-46%) scale(.97);opacity:0;visibility:hidden;transition:transform .3s var(--ease),opacity .25s,visibility .25s}
 .modal.open{transform:translate(-50%,-50%) scale(1);opacity:1;visibility:visible}
 .modal-head{display:flex;gap:16px;align-items:center;padding:22px 24px;border-bottom:1px solid var(--line);background:linear-gradient(135deg,var(--green-50),#fff)}
 .modal-thumb{width:76px;height:76px;flex:none;border-radius:18px;display:grid;place-items:center;background:linear-gradient(135deg,var(--tile-a),var(--tile-b))}
 .modal-thumb svg{width:44px;height:44px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .modal-head h2{font-size:1.25rem;font-weight:800}
-.modal-close{margin-left:auto;align-self:flex-start;width:40px;height:40px;flex:none;border-radius:50%;border:1.5px solid var(--line);background:#fff;font-size:1.4rem;line-height:1}
-.modal-close:hover{background:var(--bg-soft)}
 .modal-body{padding:20px 24px 24px}
 .offers{display:flex;flex-direction:column;gap:10px;margin-top:14px}
 .offer{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;padding:14px;border:1.5px solid var(--line);border-radius:14px}
@@ -267,7 +396,23 @@ section{padding:72px 0}
 .offer-right .btn{margin-top:6px}
 .modal-foot{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-top:20px}
 .fine{font-size:.8rem;color:var(--ink-mute);margin-top:16px}
+@media (max-width:560px){
+  .offer{grid-template-columns:auto 1fr}
+  .offer-right{grid-column:1/-1;text-align:left;display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .modal-head{padding:18px}
+  .modal-body{padding:16px 18px 20px}
+}
+/* END CSS SECTION 07: PRODUCT COMPARISON */
 
+
+/* ===================================================================
+   START CSS SECTION 08: WATCHLIST
+   Heart button on product cards + the watchlist drawer.
+   =================================================================== */
+.wl-btn{position:absolute;right:10px;top:10px;width:38px;height:38px;border-radius:50%;border:0;background:rgba(255,255,255,.95);display:grid;place-items:center;box-shadow:var(--shadow-sm);transition:transform .2s var(--ease)}
+.wl-btn:hover{transform:scale(1.1)}
+.wl-btn svg{width:20px;height:20px;fill:none;stroke:var(--ink-soft);stroke-width:2;stroke-linejoin:round}
+.wl-btn[aria-pressed="true"] svg{fill:var(--red);stroke:var(--red)}
 .drawer{position:fixed;z-index:160;top:0;right:0;height:100dvh;width:min(420px,100%);background:#fff;box-shadow:var(--shadow-lg);display:flex;flex-direction:column;transform:translateX(104%);visibility:hidden;transition:transform .35s var(--ease),visibility .35s}
 .drawer.open{transform:none;visibility:visible}
 .drawer-head{display:flex;align-items:center;justify-content:space-between;padding:20px 22px;border-bottom:1px solid var(--line)}
@@ -281,94 +426,175 @@ section{padding:72px 0}
 .wl-item .row{display:flex;gap:8px;flex-wrap:wrap}
 .drawer-foot{padding:16px 22px 22px;border-top:1px solid var(--line);font-size:.8rem;color:var(--ink-mute)}
 .drawer-foot .btn{margin-bottom:10px;width:100%}
+/* END CSS SECTION 08: WATCHLIST */
 
-/* Toast */
-.toast{position:fixed;left:50%;bottom:24px;z-index:300;transform:translate(-50%,30px);background:var(--green-950);color:#fff;padding:12px 20px;border-radius:999px;font-size:.9rem;font-weight:600;box-shadow:var(--shadow-lg);opacity:0;pointer-events:none;transition:opacity .25s,transform .3s var(--ease);max-width:calc(100% - 32px);text-align:center}
-.toast.show{opacity:1;transform:translate(-50%,0)}
 
-/* Scroll reveal */
-.reveal{opacity:0;transform:translateY(22px);transition:opacity .6s var(--ease),transform .6s var(--ease)}
-.reveal.in{opacity:1;transform:none}
-
-/* ---------- 9. Responsive ---------- */
-@media (max-width:1024px){
-  .hero-grid{grid-template-columns:minmax(0,1fr);gap:24px}
-  .hero-visual{min-height:380px}
-  .cat-grid{grid-template-columns:repeat(4,1fr)}
-  .why-grid{grid-template-columns:repeat(2,1fr)}
-  .footer-grid{grid-template-columns:1fr 1fr}
-}
+/* ===================================================================
+   START CSS SECTION 09: HOW IT WORKS (+ Why choose ValueD)
+   =================================================================== */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.step{position:relative;background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:30px 26px;box-shadow:var(--shadow-sm)}
+.step-num{width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,var(--green-500),var(--green-700));color:#fff;font-weight:800;font-size:1.2rem;display:grid;place-items:center;margin-bottom:18px}
+.step h3{font-size:1.2rem;margin-bottom:8px}
+.step p{color:var(--ink-soft)}
+.step:not(:last-child)::after{content:"";position:absolute;right:-17px;top:52px;width:12px;height:12px;border-top:3px solid var(--green-400);border-right:3px solid var(--green-400);transform:rotate(45deg)}
+.why-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+.why{padding:28px 24px;border-radius:var(--radius);background:linear-gradient(160deg,#fff,var(--green-50));border:1px solid var(--green-100);transition:transform .25s var(--ease),box-shadow .25s}
+.why:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+.why-icon{width:52px;height:52px;border-radius:16px;background:var(--green-600);color:#fff;display:grid;place-items:center;margin-bottom:16px}
+.why-icon svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.why h3{font-size:1.08rem;margin-bottom:8px}
+.why p{color:var(--ink-soft);font-size:.94rem}
+@media (max-width:1024px){.why-grid{grid-template-columns:repeat(2,1fr)}}
 @media (max-width:860px){
-  .menu-toggle{display:inline-grid}
-  .main-nav{position:absolute;left:0;right:0;top:var(--header-h);background:#fff;border-bottom:1px solid var(--line);box-shadow:0 20px 30px rgba(10,58,44,.1);padding:10px 20px 18px;display:none}
-  .main-nav.open{display:block;animation:drop .25s var(--ease)}
-  .nav-list{flex-direction:column;align-items:stretch;gap:2px}
-  .nav-list a{padding:14px 16px;font-size:1rem}
-  .cat-grid{grid-template-columns:repeat(2,1fr)}
   .steps{grid-template-columns:1fr}
   .step:not(:last-child)::after{display:none}
 }
-@keyframes drop{from{opacity:0;transform:translateY(-8px)}}
-@media (max-width:560px){
-  :root{--header-h:64px}
-  section{padding:52px 0}
-  .brand-mark{width:44px;height:38px}
-  .brand-name{font-size:1.4rem}
-  .brand-tag{display:none}
-  .hero{padding:36px 0 52px}
-  .search-box{padding-left:14px}
-  .search-box .btn{padding:12px 16px}
-  .why-grid,.footer-grid{grid-template-columns:1fr}
-  .float-badge{right:0;top:4%;transform:rotate(-5deg) scale(.8)}
-  .phone{width:min(260px,72%)}
-  .offer{grid-template-columns:auto 1fr}
-  .offer-right{grid-column:1/-1;text-align:left;display:flex;align-items:center;justify-content:space-between;gap:10px}
-  .modal-head{padding:18px}
-  .modal-body{padding:16px 18px 20px}
-  .sort{width:100%}
-  .sort select{flex:1}
-}
+@media (max-width:560px){.why-grid{grid-template-columns:1fr}}
+/* END CSS SECTION 09: HOW IT WORKS (+ Why choose ValueD) */
 
-/* ---------- 10. Reduced motion ---------- */
-@media (prefers-reduced-motion:reduce){
-  html{scroll-behavior:auto}
-  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
-  .reveal{opacity:1;transform:none}
+
+/* ===================================================================
+   START CSS SECTION 10: ABOUT US
+   =================================================================== */
+.about-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:40px;align-items:start}
+.about-lead{font-size:1.15rem;color:var(--ink-soft);margin-top:14px}
+.about-status{margin-top:22px;padding:20px 22px;border-radius:var(--radius);background:#fff;border:1px solid var(--line);box-shadow:var(--shadow-sm)}
+.about-status h3{font-size:1rem;margin-bottom:10px;color:var(--green-950)}
+.about-status ul{display:grid;gap:8px}
+.about-status li{position:relative;padding-left:22px;color:var(--ink-soft);font-size:.94rem}
+.about-status li::before{content:"";position:absolute;left:4px;top:.6em;width:7px;height:7px;border-radius:50%;background:var(--amber)}
+.about-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.about-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow-sm);transition:transform .25s var(--ease),box-shadow .25s}
+.about-card:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
+.about-card .about-icon{width:46px;height:46px;border-radius:14px;background:var(--green-50);color:var(--green-700);display:grid;place-items:center;margin-bottom:14px;border:1px solid var(--green-100)}
+.about-card .about-icon svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.about-card h3{font-size:1.08rem;margin-bottom:8px}
+.about-card p{color:var(--ink-soft);font-size:.94rem}
+@media (max-width:1024px){.about-grid{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:560px){.about-cards{grid-template-columns:minmax(0,1fr)}}
+/* END CSS SECTION 10: ABOUT US */
+
+
+/* ===================================================================
+   START CSS SECTION 11: CONTACT US
+   =================================================================== */
+.contact-grid{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:32px;align-items:start}
+.contact-info{display:grid;gap:14px}
+.contact-item{display:flex;gap:14px;align-items:flex-start;padding:18px;background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-sm)}
+.contact-item .ci-icon{width:42px;height:42px;flex:none;border-radius:12px;background:var(--green-50);border:1px solid var(--green-100);color:var(--green-700);display:grid;place-items:center}
+.contact-item .ci-icon svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.contact-item b{display:block;font-size:.95rem}
+.contact-item span{display:block;color:var(--ink-soft);font-size:.9rem;overflow-wrap:anywhere}
+.contact-form{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:30px;box-shadow:var(--shadow)}
+.form-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.field{margin-bottom:16px}
+.field label{display:block;font-weight:650;font-size:.9rem;margin-bottom:6px}
+.field label .req{color:var(--red)}
+.field input,.field textarea{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;font:inherit;font-size:.98rem;color:var(--ink);background:#fff;transition:border-color .2s,box-shadow .2s}
+.field textarea{min-height:140px;resize:vertical}
+.field input:focus,.field textarea:focus{outline:0;border-color:var(--green-500);box-shadow:0 0 0 4px rgba(31,168,85,.15)}
+.field input[aria-invalid="true"],.field textarea[aria-invalid="true"]{border-color:var(--red);box-shadow:0 0 0 4px rgba(214,69,61,.1)}
+.field-error{color:var(--red);font-size:.82rem;font-weight:600;margin-top:5px}
+.field-error[hidden]{display:none}
+.form-status{display:none;margin:4px 0 16px;padding:14px 16px;border-radius:12px;font-size:.92rem;font-weight:550}
+.form-status.show{display:block}
+.form-status.success{background:var(--green-50);border:1px solid var(--green-400);color:var(--green-900)}
+.form-status.error{background:#fdecea;border:1px solid #f1b5b0;color:#8c231c}
+.form-status.warn{background:#fff7e6;border:1px solid #ffe2a6;color:#6e4a07}
+.contact-note{margin-bottom:18px;padding:14px 16px;border-radius:12px;background:#fff7e6;border:1px solid #ffe2a6;color:#6e4a07;font-size:.88rem}
+.contact-note[hidden]{display:none}
+@media (max-width:900px){.contact-grid{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:560px){
+  .contact-form{padding:22px 18px}
+  .form-row{grid-template-columns:minmax(0,1fr);gap:0}
 }
+/* END CSS SECTION 11: CONTACT US */
+
+
+/* ===================================================================
+   START CSS SECTION 12: PRIVACY POLICY
+   Layout comes from the shared .doc-* classes in Section 15.
+   Only the storage table is specific to this section.
+   =================================================================== */
+.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;margin:4px 0 12px}
+.privacy-table{width:100%;border-collapse:collapse;font-size:.88rem;min-width:520px}
+.privacy-table th,.privacy-table td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--ink-soft)}
+.privacy-table th{background:var(--bg-soft);color:var(--ink);font-weight:700}
+.privacy-table tr:last-child td{border-bottom:0}
+.privacy-table code{background:var(--green-50);padding:1px 6px;border-radius:6px;font-size:.84rem;color:var(--green-900);overflow-wrap:anywhere}
+/* END CSS SECTION 12: PRIVACY POLICY */
+
+
+/* ===================================================================
+   START CSS SECTION 13: TERMS & CONDITIONS
+   Layout comes from the shared .doc-* classes in Section 15.
+   =================================================================== */
+.terms-key{margin:0 0 26px;padding:18px 22px;border-radius:var(--radius-sm);background:var(--green-50);border:1px solid var(--green-100);color:var(--green-900);font-size:.95rem}
+.terms-key b{color:var(--green-950)}
+/* END CSS SECTION 13: TERMS & CONDITIONS */
+
+
+/* ===================================================================
+   START CSS SECTION 14: FOOTER
+   =================================================================== */
+.site-footer{background:var(--green-950);color:#bcd5c8;padding:60px 0 28px}
+.footer-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1.2fr;gap:36px}
+.site-footer p{font-size:.92rem;margin-top:14px;max-width:320px}
+.site-footer h4{color:#fff;font-size:1rem;margin-bottom:14px;letter-spacing:0}
+.site-footer li{margin-bottom:9px}
+.site-footer li a{text-decoration:none;font-size:.93rem;transition:color .2s}
+.site-footer li a:hover{color:#fff;text-decoration:underline}
+.footer-bottom{margin-top:44px;padding-top:22px;border-top:1px solid rgba(255,255,255,.12);display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;font-size:.84rem;color:#8fb3a1}
+@media (max-width:1024px){.footer-grid{grid-template-columns:1fr 1fr}}
+@media (max-width:560px){.footer-grid{grid-template-columns:1fr}}
+/* END CSS SECTION 14: FOOTER */
 </style>
 </head>
+
 <body>
 
-<!-- Shared SVG gradient used by the logo (referenced via url(#vdGrad)) -->
-<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+<!-- START SECTION 01: LOGO & BRANDING -->
+<!--
+  Single source of truth for the ValueD logo.
+  - symbol "vd-logo-mark" : the VD monogram with the shopping cart inside the D.
+    (Cart uses currentColor, so it adapts to light/dark backgrounds.)
+  - template "vd-lockup-template" : monogram + "ValueD" wordmark + tagline.
+    JS SECTION 01 copies this template into every element marked data-brand-lockup
+    (header and footer). Edit it here and both update.
+  - Brand colours and logo sizing: CSS SECTION 01.
+-->
+<svg id="logo-defs" width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
   <defs>
     <linearGradient id="vdGrad" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#3fcb6b"/>
       <stop offset="1" stop-color="#0b7a46"/>
     </linearGradient>
+    <symbol id="vd-logo-mark" viewBox="0 0 64 56">
+      <path d="M7 9 L24 46 L38 14" fill="none" stroke="url(#vdGrad)" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M31 47 H42 a18 18 0 0 0 0 -36 H33" fill="none" stroke="url(#vdGrad)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M37 22 h3 l2.2 9 h8 l2 -7 h-11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="43" cy="35.5" r="1.6" fill="currentColor"/>
+      <circle cx="50" cy="35.5" r="1.6" fill="currentColor"/>
+    </symbol>
   </defs>
 </svg>
+<template id="vd-lockup-template">
+  <svg class="brand-mark" viewBox="0 0 64 56" aria-hidden="true" focusable="false"><use href="#vd-logo-mark"></use></svg>
+  <span class="brand-text">
+    <span class="brand-name">Value<b>D</b></span>
+    <span class="brand-tag">Compare Smart. Buy Better.</span>
+  </span>
+</template>
+<!-- END SECTION 01: LOGO & BRANDING -->
 
+
+<!-- START SECTION 02: HEADER & NAVIGATION -->
 <a class="skip-link" href="#main">Skip to content</a>
-
-<!-- =====================================================================
-     HEADER
-     ===================================================================== -->
 <header class="site-header" id="siteHeader">
   <div class="container header-inner">
-    <a class="brand" href="#home" aria-label="ValueD – Compare Smart. Buy Better. Home">
-      <!-- ValueD logo mark: a "V" and "D" with a shopping cart -->
-      <svg class="brand-mark" viewBox="0 0 64 56" aria-hidden="true">
-        <path d="M7 9 L24 46 L38 14" fill="none" stroke="url(#vdGrad)" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M31 47 H42 a18 18 0 0 0 0 -36 H33" fill="none" stroke="url(#vdGrad)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M37 22 h3 l2.2 9 h8 l2 -7 h-11" fill="none" stroke="#0a3a2c" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-        <circle cx="43" cy="35.5" r="1.6" fill="#0a3a2c"/><circle cx="50" cy="35.5" r="1.6" fill="#0a3a2c"/>
-      </svg>
-      <span class="brand-text">
-        <span class="brand-name">Value<b>D</b></span>
-        <span class="brand-tag">Compare Smart. Buy Better.</span>
-      </span>
-    </a>
+    <!-- Logo lockup is injected from SECTION 01 (fallback text shown if scripts are off) -->
+    <a class="brand" href="#home" data-brand-lockup aria-label="ValueD – Compare Smart. Buy Better. Home"><span class="brand-name">Value<b>D</b></span></a>
 
     <nav class="main-nav" id="mainNav" aria-label="Main navigation">
       <ul class="nav-list">
@@ -383,8 +609,9 @@ section{padding:72px 0}
       <button class="icon-btn" id="headerSearchBtn" type="button" aria-label="Search products">
         <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
       </button>
+      <!-- Watchlist icon + count: the markup lives here, behaviour is JS SECTION 08 -->
       <button class="icon-btn" id="watchBtn" type="button" aria-label="Open watchlist, 0 items" aria-haspopup="dialog">
-        <svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-9.3-9.2C1.4 8.4 3.4 5 6.8 5c2 0 3.4 1.1 5.2 3 1.8-1.9 3.2-3 5.2-3 3.4 0 5.4 3.400 4.100 6.800C19.500 16.400 12 21 12 21z"/></svg>
+        <svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-9.3-9.2C1.4 8.4 3.4 5 6.8 5c2 0 3.4 1.1 5.2 3 1.8-1.9 3.2-3 5.2-3 3.4 0 5.4 3.4 4.1 6.8C19.5 16.4 12 21 12 21z"/></svg>
         <span class="badge-count" id="watchCount">0</span>
       </button>
       <button class="icon-btn menu-toggle" id="menuToggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mainNav">
@@ -393,21 +620,20 @@ section{padding:72px 0}
     </div>
   </div>
 </header>
+<!-- END SECTION 02: HEADER & NAVIGATION -->
 
+<main id="main">
+
+<!-- START SECTION 03: HOMEPAGE -->
 <div class="demo-banner" role="note">
   <b>Demo site:</b> all products, prices, discounts, ratings and offers on ValueD are <b>sample demo data</b>, not live or verified prices.
 </div>
 
-<main id="main">
-
-<!-- =====================================================================
-     HERO
-     ===================================================================== -->
 <section class="hero" id="home" style="padding-top:56px">
   <div class="container hero-grid">
     <div>
       <span class="eyebrow">
-        <svg viewBox="0 0 24 24"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.100L5 10l5.100-1.900z"/></svg>
+        <svg viewBox="0 0 24 24"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/></svg>
         Smart shopping research for India
       </span>
       <h1>Compare Smart. <span>Buy Better.</span></h1>
@@ -456,10 +682,10 @@ section{padding:72px 0}
     </div>
   </div>
 </section>
+<!-- END SECTION 03: HOMEPAGE -->
 
-<!-- =====================================================================
-     CATEGORIES
-     ===================================================================== -->
+
+<!-- START SECTION 04: PRODUCT CATEGORIES -->
 <section id="categories">
   <div class="container">
     <div class="section-head reveal">
@@ -468,13 +694,14 @@ section{padding:72px 0}
         <p>Pick a category to filter the sample catalogue below.</p>
       </div>
     </div>
+    <!-- Category cards are rendered by JS SECTION 04 from the CATEGORIES list (JS SHARED A) -->
     <div class="cat-grid" id="catGrid"></div>
   </div>
 </section>
+<!-- END SECTION 04: PRODUCT CATEGORIES -->
 
-<!-- =====================================================================
-     TRENDING PRODUCTS (search + category filter results)
-     ===================================================================== -->
+
+<!-- START SECTION 05: TRENDING PRODUCTS -->
 <section id="products" class="soft-bg">
   <div class="container">
     <div class="section-head reveal">
@@ -502,10 +729,10 @@ section{padding:72px 0}
     <div class="product-grid" id="productGrid"></div>
   </div>
 </section>
+<!-- END SECTION 05: TRENDING PRODUCTS -->
 
-<!-- =====================================================================
-     BEST DEALS
-     ===================================================================== -->
+
+<!-- START SECTION 06: DEALS PAGE -->
 <section id="deals">
   <div class="container">
     <div class="section-head reveal">
@@ -515,13 +742,52 @@ section{padding:72px 0}
       </div>
       <span class="sample-pill">Demo discounts</span>
     </div>
+
+    <!-- Deal filters (rendered/handled by JS SECTION 06) -->
+    <div class="filter-bar">
+      <div class="chip-row" id="dealChipRow" role="group" aria-label="Filter deals by category"></div>
+      <label class="sort">Sort deals
+        <select id="dealSort">
+          <option value="discount">Biggest sample discount</option>
+          <option value="price-asc">Price: low to high</option>
+          <option value="price-desc">Price: high to low</option>
+        </select>
+      </label>
+    </div>
+
     <div class="product-grid" id="dealGrid"></div>
+    <div class="deal-foot">
+      <span id="dealInfo" aria-live="polite"></span>
+      <button type="button" class="btn btn-ghost btn-sm" id="dealMore" hidden>Show all deals</button>
+    </div>
   </div>
 </section>
+<!-- END SECTION 06: DEALS PAGE -->
 
-<!-- =====================================================================
-     HOW IT WORKS
-     ===================================================================== -->
+
+<!-- START SECTION 07: PRODUCT COMPARISON -->
+<!-- Shared page overlay (used by this modal AND the watchlist drawer) and toast message -->
+<div class="overlay" id="overlay"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<!-- Compare modal: content is built by JS SECTION 07 when a "Compare Prices" / "View Deal" button is pressed -->
+<div class="modal" id="compareModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" tabindex="-1"></div>
+<!-- END SECTION 07: PRODUCT COMPARISON -->
+
+
+<!-- START SECTION 08: WATCHLIST -->
+<!-- Drawer. The header heart icon + count (#watchBtn, #watchCount) are in SECTION 02 and are driven by JS SECTION 08. -->
+<aside class="drawer" id="watchDrawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle" tabindex="-1">
+  <div class="drawer-head">
+    <h2 id="drawerTitle">My Watchlist</h2>
+    <button class="modal-close" type="button" id="drawerClose" aria-label="Close watchlist" style="margin-left:0">×</button>
+  </div>
+  <div class="drawer-body" id="drawerBody"></div>
+  <div class="drawer-foot" id="drawerFoot"></div>
+</aside>
+<!-- END SECTION 08: WATCHLIST -->
+
+
+<!-- START SECTION 09: HOW IT WORKS -->
 <section id="how-it-works" class="soft-bg">
   <div class="container">
     <div class="section-head reveal">
@@ -538,9 +804,6 @@ section{padding:72px 0}
   </div>
 </section>
 
-<!-- =====================================================================
-     WHY VALUED
-     ===================================================================== -->
 <section id="why">
   <div class="container">
     <div class="section-head reveal">
@@ -555,7 +818,7 @@ section{padding:72px 0}
         <h3>Easy price comparison</h3><p>Offers are laid out in one clear view, with the lowest sample price highlighted.</p>
       </article>
       <article class="why reveal">
-        <div class="why-icon"><svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.500-3.200 8-8 9-4.800-1-8-4.500-8-9V6z"/><path d="M8.500 12l2.500 2.500 4.500-5"/></svg></div>
+        <div class="why-icon"><svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg></div>
         <h3>Transparent sample offers</h3><p>Everything on this demo is clearly labelled as sample data — no hidden claims.</p>
       </article>
       <article class="why reveal">
@@ -563,55 +826,333 @@ section{padding:72px 0}
         <h3>User-friendly research</h3><p>Search, filters, sorting and a personal watchlist designed to be quick on any device.</p>
       </article>
       <article class="why reveal">
-        <div class="why-icon"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.500 10.900c.700.600 1 1.300 1 2.100h5c0-.800.300-1.500 1-2.100A6 6 0 0 0 12 3z"/></svg></div>
+        <div class="why-icon"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.7.6 1 1.3 1 2.1h5c0-.8.3-1.5 1-2.1A6 6 0 0 0 12 3z"/></svg></div>
         <h3>Smarter buying decisions</h3><p>Look at the full picture — price, delivery and availability — before you choose.</p>
       </article>
     </div>
     <p class="notice reveal"><b>Please note:</b> ValueD is currently a static demonstration. It does not show live prices, check real stock, send price-drop alerts or sell anything. Product and retailer names appear only as illustrative examples and do not imply any partnership or endorsement.</p>
   </div>
 </section>
+<!-- END SECTION 09: HOW IT WORKS -->
+
+
+<!-- START SECTION 10: ABOUT US -->
+<section id="about" class="soft-bg">
+  <div class="container">
+    <div class="about-grid">
+      <div class="reveal">
+        <span class="sample-pill" style="background:var(--green-50);color:var(--green-700);border-color:var(--green-100)">About Us</span>
+        <h2 style="font-size:clamp(1.7rem,3.6vw,2.4rem);font-weight:800;color:var(--green-950);margin-top:14px">Shopping decisions, made easier.</h2>
+        <p class="about-lead">ValueD is a product price comparison website for shoppers in India. It puts offers for the same product from different retailers side by side, so you can compare them in one place instead of piecing them together yourself.</p>
+
+        <div class="about-status">
+          <h3>Where ValueD is today</h3>
+          <ul>
+            <li>This version is a front-end demonstration that uses clearly labelled sample data.</li>
+            <li>It does not show live or verified prices, and it does not sell products.</li>
+            <li>There are no user accounts, and price-drop alerts are not available.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="about-cards">
+        <article class="about-card reveal">
+          <div class="about-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></div>
+          <h3>Why compare prices</h3>
+          <p>The price, delivery terms and availability of the same product can differ from one retailer to another. Seeing them together helps you judge which offer suits you.</p>
+        </article>
+        <article class="about-card reveal">
+          <div class="about-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/></svg></div>
+          <h3>Our mission</h3>
+          <p>To make shopping decisions easier by bringing comparable offer information into one clear, easy-to-read place.</p>
+        </article>
+        <article class="about-card reveal">
+          <div class="about-icon"><svg viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></div>
+          <h3>Our vision</h3>
+          <p>Transparent product-price comparisons: clear about what is being shown, where it comes from and how current it is.</p>
+        </article>
+        <article class="about-card reveal">
+          <div class="about-icon"><svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg></div>
+          <h3>Our commitment</h3>
+          <p>To help you make informed decisions: we label sample or unverified information clearly, avoid promising savings, and leave the final choice with you.</p>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- END SECTION 10: ABOUT US -->
+
+
+<!-- START SECTION 11: CONTACT US -->
+<section id="contact">
+  <div class="container">
+    <div class="section-head reveal">
+      <div>
+        <h2>Contact Us</h2>
+        <p>Questions, feedback or ideas for ValueD? Fill in the form and tell us what's on your mind. We'd love to hear how we can make price comparison easier for you.</p>
+      </div>
+    </div>
+
+    <div class="contact-grid">
+      <div class="contact-info reveal" aria-label="Contact details (placeholders)">
+        <div class="contact-item">
+          <span class="ci-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg></span>
+          <div><b>Email</b><span><mark class="fill-in">[CONTACT EMAIL – to be added]</mark></span></div>
+        </div>
+        <div class="contact-item">
+          <span class="ci-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg></span>
+          <div><b>Phone</b><span><mark class="fill-in">[PHONE NUMBER – to be added]</mark></span></div>
+        </div>
+        <div class="contact-item">
+          <span class="ci-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-6.1 7-11a7 7 0 0 0-14 0c0 4.9 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg></span>
+          <div><b>Business address</b><span><mark class="fill-in">[BUSINESS ADDRESS – to be added]</mark></span></div>
+        </div>
+        <p style="font-size:.84rem;color:var(--ink-mute)">The details above are placeholders. No contact details have been published yet.</p>
+      </div>
+
+      <form class="contact-form reveal" id="contactForm" novalidate aria-labelledby="contactFormTitle">
+        <h3 id="contactFormTitle" class="sr-only">Contact form</h3>
+
+        <!-- Shown while no form-handling service is connected (see CONFIG.contactEndpoint in JS SHARED A) -->
+        <p class="contact-note" id="contactNote"><b>Heads-up:</b> this demo site has no message-delivery service connected yet, so submitting this form will <b>not</b> send your message anywhere. A working form-submission service must be connected first.</p>
+
+        <div class="form-row">
+          <div class="field">
+            <label for="contactName">Name <span class="req" aria-hidden="true">*</span></label>
+            <input id="contactName" name="name" type="text" autocomplete="name" required maxlength="80" aria-describedby="contactNameError">
+            <p class="field-error" id="contactNameError" hidden></p>
+          </div>
+          <div class="field">
+            <label for="contactEmail">Email <span class="req" aria-hidden="true">*</span></label>
+            <input id="contactEmail" name="email" type="email" autocomplete="email" required maxlength="120" aria-describedby="contactEmailError">
+            <p class="field-error" id="contactEmailError" hidden></p>
+          </div>
+        </div>
+        <div class="field">
+          <label for="contactSubject">Subject <span class="req" aria-hidden="true">*</span></label>
+          <input id="contactSubject" name="subject" type="text" required maxlength="120" aria-describedby="contactSubjectError">
+          <p class="field-error" id="contactSubjectError" hidden></p>
+        </div>
+        <div class="field">
+          <label for="contactMessage">Message <span class="req" aria-hidden="true">*</span></label>
+          <textarea id="contactMessage" name="message" required maxlength="2000" aria-describedby="contactMessageError"></textarea>
+          <p class="field-error" id="contactMessageError" hidden></p>
+        </div>
+
+        <div class="form-status" id="contactStatus" role="status" aria-live="polite"></div>
+        <button type="submit" class="btn btn-primary" id="contactSubmit">Send message</button>
+      </form>
+    </div>
+  </div>
+</section>
+<!-- END SECTION 11: CONTACT US -->
+
+
+<!-- START SECTION 12: PRIVACY POLICY -->
+<section id="privacy" class="soft-bg">
+  <div class="container">
+    <div class="section-head reveal">
+      <div>
+        <h2>Privacy Policy</h2>
+        <p>How this website handles information, described as the site actually works today.</p>
+      </div>
+    </div>
+
+    <div class="doc-layout">
+      <nav class="doc-toc" aria-label="Privacy Policy contents">
+        <h3>On this page</h3>
+        <ol>
+          <li><a href="#privacy-provide">Information you provide</a></li>
+          <li><a href="#privacy-storage">Browser storage</a></li>
+          <li><a href="#privacy-cookies">Cookies &amp; analytics</a></li>
+          <li><a href="#privacy-third">Third-party services</a></li>
+          <li><a href="#privacy-retention">Retention &amp; deletion</a></li>
+          <li><a href="#privacy-choices">Your choices</a></li>
+          <li><a href="#privacy-contact">Privacy questions</a></li>
+        </ol>
+      </nav>
+
+      <article class="doc-body">
+        <p class="notice doc-draft"><b>Draft – review needed before publication.</b> This is a template, not legal advice. Items highlighted like <mark class="fill-in">[THIS]</mark> must be supplied by the site owner, and the whole policy should be reviewed by a qualified professional against the laws that apply to your business (for example, in India, the Information Technology Act, 2000 and the Digital Personal Data Protection Act, 2023 may be relevant).</p>
+
+        <p style="color:var(--ink-soft);margin-bottom:24px"><b>Operator:</b> <mark class="fill-in">[BUSINESS / OPERATOR NAME]</mark> &nbsp;•&nbsp; <b>Effective date:</b> <mark class="fill-in">[DATE]</mark></p>
+
+        <div class="doc-block" id="privacy-provide">
+          <h3>1. Information you provide</h3>
+          <p>ValueD currently has no backend, no user accounts and no login. The site does not send what you type to any server:</p>
+          <ul>
+            <li><b>Search and filters.</b> Text you type in the search box and the filters you choose are used in your browser to filter the sample catalogue. They are not transmitted or stored, and are lost when you refresh the page.</li>
+            <li><b>Contact form.</b> Name, email, subject and message are checked in your browser. At present no form-handling service is connected, so these details are <b>not</b> sent or stored anywhere by this site. <mark class="fill-in">[If a form service is connected later: name the provider, what is sent, and how it is used.]</mark></li>
+          </ul>
+        </div>
+
+        <div class="doc-block" id="privacy-storage">
+          <h3>2. Local browser storage</h3>
+          <p>The only thing this site saves is your watchlist, using your browser's <code>localStorage</code> on your own device.</p>
+          <div class="table-wrap">
+            <table class="privacy-table">
+              <thead><tr><th>Item</th><th>What is stored</th><th>Where</th><th>How long</th></tr></thead>
+              <tbody>
+                <tr><td>Watchlist</td><td>The IDs of the products you saved, under the key <code>valued.watchlist.v1</code></td><td>Your browser, on your device only</td><td>Until you remove items, use “Clear watchlist”, or clear this site's data in your browser</td></tr>
+                <tr><td>Search &amp; filters</td><td>Nothing</td><td>Held in memory while the page is open</td><td>Lost on refresh</td></tr>
+                <tr><td>Contact form entries</td><td>Nothing</td><td>Not stored</td><td>Not applicable</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>Your watchlist is not synchronised with any server or other device, and ValueD cannot see it.</p>
+        </div>
+
+        <div class="doc-block" id="privacy-cookies">
+          <h3>3. Cookies and analytics</h3>
+          <p>This website does not set cookies of its own and does not include analytics, advertising or tracking scripts. <mark class="fill-in">[Update this section if you add analytics or cookies later.]</mark></p>
+        </div>
+
+        <div class="doc-block" id="privacy-third">
+          <h3>4. Third-party services</h3>
+          <p>The page loads no third-party scripts, fonts, maps, payment services or sign-in services. Two points are worth knowing:</p>
+          <ul>
+            <li><b>Hosting.</b> Whoever hosts the site (for example, a static hosting provider) may keep ordinary technical logs such as IP address and browser details, under its own privacy terms. <mark class="fill-in">[Name your hosting provider.]</mark></li>
+            <li><b>Retailer links.</b> If store links are added in future, they will take you to retailers' own websites, which have their own privacy practices.</li>
+          </ul>
+        </div>
+
+        <div class="doc-block" id="privacy-retention">
+          <h3>5. Data retention and deletion</h3>
+          <p>ValueD holds no server-side copy of your watchlist or other data, so there is nothing on our side to delete. To delete your watchlist, remove items from it, press “Clear watchlist”, or clear this site's data in your browser settings. <mark class="fill-in">[If contact messages are collected later: state how long they are kept and how to request deletion.]</mark></p>
+        </div>
+
+        <div class="doc-block" id="privacy-choices">
+          <h3>6. Your choices</h3>
+          <ul>
+            <li>You can use the whole site without saving anything — the watchlist is optional.</li>
+            <li>You can block or clear site storage in your browser; the site keeps working, but your watchlist will not be remembered between visits.</li>
+            <li>You can choose not to use the contact form.</li>
+          </ul>
+        </div>
+
+        <div class="doc-block" id="privacy-contact">
+          <h3>7. Privacy questions</h3>
+          <p>For privacy questions, contact <mark class="fill-in">[PRIVACY CONTACT EMAIL]</mark> at <mark class="fill-in">[BUSINESS NAME AND ADDRESS]</mark>. You can also use the <a href="#contact" style="color:var(--green-700);font-weight:650">Contact Us</a> form once a submission service is connected.</p>
+          <p>We may update this policy when the site changes. <mark class="fill-in">[Describe how changes will be announced.]</mark></p>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+<!-- END SECTION 12: PRIVACY POLICY -->
+
+
+<!-- START SECTION 13: TERMS & CONDITIONS -->
+<section id="terms">
+  <div class="container">
+    <div class="section-head reveal">
+      <div>
+        <h2>Terms &amp; Conditions</h2>
+        <p>Please read these terms before using ValueD.</p>
+      </div>
+    </div>
+
+    <div class="doc-layout">
+      <nav class="doc-toc" aria-label="Terms and Conditions contents">
+        <h3>On this page</h3>
+        <ol>
+          <li><a href="#terms-use">Website use</a></li>
+          <li><a href="#terms-info">Product information &amp; sample pricing</a></li>
+          <li><a href="#terms-limits">Price &amp; availability limits</a></li>
+          <li><a href="#terms-links">Third-party retailer links</a></li>
+          <li><a href="#terms-ip">Intellectual property</a></li>
+          <li><a href="#terms-liability">Limitation of liability</a></li>
+          <li><a href="#terms-changes">Changes to these terms</a></li>
+          <li><a href="#terms-contact">Contact</a></li>
+        </ol>
+      </nav>
+
+      <article class="doc-body">
+        <p class="notice doc-draft"><b>Draft – review needed before publication.</b> This is a template, not legal advice. It must be reviewed and customised for your actual business and the laws that apply to it. Items highlighted like <mark class="fill-in">[THIS]</mark> must be supplied by the site owner.</p>
+
+        <p class="terms-key"><b>Key point:</b> all prices, discounts, ratings, delivery details and availability on this website are <b>sample demonstration data</b>. They are not live or verified prices, and ValueD does not guarantee any saving or any retailer's price.</p>
+
+        <p style="color:var(--ink-soft);margin-bottom:24px"><b>Operator:</b> <mark class="fill-in">[BUSINESS / OPERATOR NAME]</mark> &nbsp;•&nbsp; <b>Effective date:</b> <mark class="fill-in">[DATE]</mark></p>
+
+        <div class="doc-block" id="terms-use">
+          <h3>1. Website use</h3>
+          <p>By using ValueD you agree to these terms. ValueD is an information and research website: it is not a store, does not sell products and does not process orders or payments. You agree to use it lawfully and not to interfere with its operation or attempt to misuse it.</p>
+        </div>
+
+        <div class="doc-block" id="terms-info">
+          <h3>2. Product information and sample pricing</h3>
+          <p>In this demonstration version, the product list, prices, discounts, ratings, delivery information and availability are <b>sample data created for demonstration</b>. Retailer names are shown only as illustrative examples. Nothing on the site should be read as a real offer, a live price or a statement about any retailer's stock.</p>
+        </div>
+
+        <div class="doc-block" id="terms-limits">
+          <h3>3. Price and availability limitations</h3>
+          <p>Even when ValueD is connected to real sources in future, prices and availability can change at any time and may differ from what is shown. ValueD does not guarantee that any price, discount or availability is accurate, current or obtainable, and does not guarantee that you will save money. Always check the final price, delivery terms and conditions with the retailer before buying.</p>
+        </div>
+
+        <div class="doc-block" id="terms-links">
+          <h3>4. Third-party retailer links</h3>
+          <p>If links to retailers are added, they lead to websites that ValueD does not own or control. Those websites have their own terms and privacy practices, and any purchase is a matter between you and the retailer. ValueD is not responsible for third-party content, products, services or transactions. <mark class="fill-in">[If affiliate links are used, describe the arrangement here.]</mark></p>
+        </div>
+
+        <div class="doc-block" id="terms-ip">
+          <h3>5. Intellectual property</h3>
+          <p>The ValueD name, logo, design and original content on this site belong to <mark class="fill-in">[BUSINESS / OPERATOR NAME]</mark> unless stated otherwise. Other product, brand and retailer names mentioned belong to their respective owners, are used for illustration only and do not imply any affiliation or endorsement. You may not copy or reuse the site's content or branding without permission, except as allowed by law.</p>
+        </div>
+
+        <div class="doc-block" id="terms-liability">
+          <h3>6. Limitation of liability</h3>
+          <p>ValueD is provided “as is” and “as available”, without promises of accuracy, completeness or uninterrupted operation. To the fullest extent permitted by applicable law, ValueD and its operator are not liable for any loss or damage arising from your use of, or reliance on, the website or its sample information, including any purchasing decision. Nothing in these terms limits any right or liability that cannot be limited by law. <mark class="fill-in">[Have a qualified professional review this clause.]</mark></p>
+        </div>
+
+        <div class="doc-block" id="terms-changes">
+          <h3>7. Changes to these terms</h3>
+          <p>These terms may be updated from time to time. The version on this page applies when you use the site; continued use after an update means you accept the updated terms. <mark class="fill-in">[Describe how changes are announced.]</mark> Governing law and where disputes are handled: <mark class="fill-in">[GOVERNING LAW AND JURISDICTION]</mark>.</p>
+        </div>
+
+        <div class="doc-block" id="terms-contact">
+          <h3>8. Contact</h3>
+          <p>Questions about these terms: <mark class="fill-in">[CONTACT EMAIL]</mark>, <mark class="fill-in">[BUSINESS NAME AND ADDRESS]</mark>. You can also use the <a href="#contact" style="color:var(--green-700);font-weight:650">Contact Us</a> form once a submission service is connected.</p>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+<!-- END SECTION 13: TERMS & CONDITIONS -->
 
 </main>
 
-<!-- =====================================================================
-     FOOTER
-     ===================================================================== -->
-<footer class="site-footer">
+
+<!-- START SECTION 14: FOOTER -->
+<footer class="site-footer" id="footer">
   <div class="container">
     <div class="footer-grid">
       <div>
-        <a class="brand" href="#home" aria-label="ValueD home">
-          <svg class="brand-mark" viewBox="0 0 64 56" aria-hidden="true">
-            <path d="M7 9 L24 46 L38 14" fill="none" stroke="url(#vdGrad)" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M31 47 H42 a18 18 0 0 0 0 -36 H33" fill="none" stroke="url(#vdGrad)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M37 22 h3 l2.2 9 h8 l2 -7 h-11" fill="none" stroke="#062a20" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-            <circle cx="43" cy="35.500" r="1.600" fill="#062a20"/><circle cx="50" cy="35.500" r="1.600" fill="#062a20"/>
-          </svg>
-          <span class="brand-text"><span class="brand-name">Value<b>D</b></span><span class="brand-tag">Compare Smart. Buy Better.</span></span>
-        </a>
+        <!-- Logo lockup injected from SECTION 01 (dark-background variant) -->
+        <a class="brand brand--on-dark" href="#home" data-brand-lockup aria-label="ValueD home"><span class="brand-name">Value<b>D</b></span></a>
         <p>A shopping research demo for India. All prices and offers shown are sample data.</p>
       </div>
-      <div>
-        <h4>Quick links</h4>
+      <nav aria-label="Footer navigation">
+        <h4>Explore</h4>
         <ul>
           <li><a href="#home">Home</a></li>
           <li><a href="#categories">Categories</a></li>
           <li><a href="#deals">Deals</a></li>
-          <li><a href="#how-it-works">How It Works</a></li>
+          <li><a href="#products">Compare Prices</a></li>
         </ul>
-      </div>
+      </nav>
       <div>
         <h4>Categories</h4>
         <ul id="footerCats"></ul>
       </div>
-      <div>
-        <h4>Company</h4>
+      <nav aria-label="Company and legal">
+        <h4>Company &amp; legal</h4>
         <ul>
-          <li><a href="#" data-placeholder="Contact page">Contact</a></li>
-          <li><a href="#" data-placeholder="Privacy Policy">Privacy Policy</a></li>
-          <li><a href="#" data-placeholder="Terms and Conditions">Terms &amp; Conditions</a></li>
+          <li><a href="#about">About Us</a></li>
+          <li><a href="#contact">Contact Us</a></li>
+          <li><a href="#privacy">Privacy Policy</a></li>
+          <li><a href="#terms">Terms &amp; Conditions</a></li>
         </ul>
-      </div>
+      </nav>
     </div>
     <div class="footer-bottom">
       <span>© <span id="year">2026</span> ValueD. All rights reserved.</span>
@@ -619,43 +1160,50 @@ section{padding:72px 0}
     </div>
   </div>
 </footer>
+<!-- END SECTION 14: FOOTER -->
 
-<!-- Overlay + Compare modal + Watchlist drawer -->
-<div class="overlay" id="overlay"></div>
-<div class="modal" id="compareModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" tabindex="-1"></div>
-<aside class="drawer" id="watchDrawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle" tabindex="-1">
-  <div class="drawer-head">
-    <h2 id="drawerTitle">My Watchlist</h2>
-    <button class="modal-close" type="button" id="drawerClose" aria-label="Close watchlist" style="margin-left:0">×</button>
-  </div>
-  <div class="drawer-body" id="drawerBody"></div>
-  <div class="drawer-foot" id="drawerFoot"></div>
-</aside>
-<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
-/* =====================================================================
-   ValueD – application script (vanilla JavaScript, no dependencies)
-   ---------------------------------------------------------------------
-   SECTIONS
-     1. Configuration (retailers, store links, storage key)
-     2. Sample catalogue  (SAMPLE DEMO DATA – replace with real source)
-     3. Helpers
-     4. State + localStorage watchlist
-     5. Rendering (categories, products, deals, watchlist)
-     6. Search + filtering
-     7. Modal / drawer layer manager (focus trap, Esc, scroll lock)
-     8. Event wiring
-   ===================================================================== */
+/* ===================================================================
+   START SECTION 16: JAVASCRIPT
+   Plain JavaScript, no libraries. Structure:
+
+     JS SHARED A  config + sample data      (used by many sections)
+     JS SHARED B  helpers, events bus, layers (modal/drawer manager)
+     JS SECTION 01 … 14  one module per page section
+     JS SHARED C  start-up (calls each module's init in order)
+
+   Each section module is an object (Logo, Header, Home, Categories,
+   Trending, Deals, Compare, Watch, Contact, Footer) with its own
+   init(). Modules talk to each other through the small events bus
+   (Bus.on / Bus.emit) wherever possible. A "DEPENDS ON" note at the
+   top of each module lists what it needs from other parts.
+
+   Bus events:
+     search:set        {query, cat?, scroll?}  -> Trending filters the list
+     category:toggle   {cat}                   -> Trending toggles a category
+     search:changed    {query}                 -> Home syncs the search box
+     category:changed  {cat}                   -> Categories highlights the card
+     search:focus      -                       -> Home focuses the search box
+     watch:changed     -                       -> Trending/Compare/Watch refresh
+   =================================================================== */
 (function () {
   'use strict';
 
-  /* ---------- 1. CONFIGURATION ---------- */
+  /* ===============================================================
+     START JS SHARED A: CONFIG & SAMPLE DATA
+     =============================================================== */
+  var CONFIG = {
+    // localStorage key for the watchlist (Section 08, described in Privacy Policy Section 12)
+    storageKey: 'valued.watchlist.v1',
+    // CONTACT FORM (Section 11): leave '' until a real form-handling service exists.
+    // When set to an https:// URL, the form POSTs the fields there (FormData, Accept: application/json).
+    // While empty, the form validates but clearly tells the visitor nothing was sent.
+    contactEndpoint: ''
+  };
 
-  // Retailer display settings. "url" is intentionally EMPTY.
-  // The "Visit Store" button only appears when a valid https:// URL is set
-  // here (for a whole retailer) or on an individual offer (offer.url).
-  // Never point these at fake checkout pages.
+  // Retailer display settings. "url" is intentionally EMPTY: the "Visit Store" button
+  // only appears when a valid https:// URL is set here (per retailer) or on an offer (offer.url).
   var RETAILERS = {
     'Amazon':           { color: '#e2874b', url: '' },
     'Flipkart':         { color: '#2f7de1', url: '' },
@@ -665,28 +1213,24 @@ section{padding:72px 0}
     'Tata CLiQ':        { color: '#c2478d', url: '' }
   };
 
-  var STORAGE_KEY = 'valued.watchlist.v1';
-
-  /* Category definitions: key, label, tile colours and inline SVG icon (48x48 grid) */
+  // Category definitions: key, label, tile colours and inline SVG icon (48x48 grid)
   var CATEGORIES = [
-    { key: 'smartphones', label: 'Smartphones',    a: '#7fd6a0', b: '#0e8a4f', icon: '<rect x="14" y="4" width="20" height="40" rx="4"/><path d="M21 9h6M22 38h4"/>' },
-    { key: 'laptops',     label: 'Laptops',        a: '#6fb7e8', b: '#2f6fd1', icon: '<rect x="9" y="10" width="30" height="21" rx="2"/><path d="M4 37h40l-3 4H7z"/>' },
-    { key: 'headphones',  label: 'Headphones',     a: '#b19cf0', b: '#6a4fd0', icon: '<path d="M9 29v-5a15 15 0 0 1 30 0v5"/><rect x="7" y="27" width="8" height="13" rx="3"/><rect x="33" y="27" width="8" height="13" rx="3"/>' },
-    { key: 'smartwatches',label: 'Smartwatches',   a: '#f2a37a', b: '#d9622b', icon: '<rect x="13" y="12" width="22" height="24" rx="7"/><path d="M18 12V5h12v7M18 36v7h12v-7M24 19v6l4 2"/>' },
-    { key: 'tablets',     label: 'Tablets',        a: '#e48bb8', b: '#b5427f', icon: '<rect x="8" y="7" width="32" height="34" rx="4"/><circle cx="24" cy="35" r="1.500"/>' },
-    { key: 'televisions', label: 'Televisions',    a: '#6fd0d0', b: '#1b8f9a', icon: '<rect x="4" y="8" width="40" height="27" rx="3"/><path d="M16 43h16M24 35v8"/>' },
-    { key: 'cameras',     label: 'Cameras',        a: '#f0cc6a', b: '#c98f12', icon: '<rect x="5" y="14" width="38" height="27" rx="5"/><circle cx="24" cy="27" r="8"/><path d="M16 14l2-5h10l2 5"/>' },
-    { key: 'appliances',  label: 'Home Appliances',a: '#9bb4d6', b: '#4d6b99', icon: '<rect x="9" y="4" width="30" height="40" rx="4"/><circle cx="24" cy="28" r="9"/><circle cx="24" cy="28" r="4.500"/><path d="M14 10h4M22 10h2"/>' }
+    { key: 'smartphones', label: 'Smartphones',     a: '#7fd6a0', b: '#0e8a4f', icon: '<rect x="14" y="4" width="20" height="40" rx="4"/><path d="M21 9h6M22 38h4"/>' },
+    { key: 'laptops',     label: 'Laptops',         a: '#6fb7e8', b: '#2f6fd1', icon: '<rect x="9" y="10" width="30" height="21" rx="2"/><path d="M4 37h40l-3 4H7z"/>' },
+    { key: 'headphones',  label: 'Headphones',      a: '#b19cf0', b: '#6a4fd0', icon: '<path d="M9 29v-5a15 15 0 0 1 30 0v5"/><rect x="7" y="27" width="8" height="13" rx="3"/><rect x="33" y="27" width="8" height="13" rx="3"/>' },
+    { key: 'smartwatches',label: 'Smartwatches',    a: '#f2a37a', b: '#d9622b', icon: '<rect x="13" y="12" width="22" height="24" rx="7"/><path d="M18 12V5h12v7M18 36v7h12v-7M24 19v6l4 2"/>' },
+    { key: 'tablets',     label: 'Tablets',         a: '#e48bb8', b: '#b5427f', icon: '<rect x="8" y="7" width="32" height="34" rx="4"/><circle cx="24" cy="35" r="1.5"/>' },
+    { key: 'televisions', label: 'Televisions',     a: '#6fd0d0', b: '#1b8f9a', icon: '<rect x="4" y="8" width="40" height="27" rx="3"/><path d="M16 43h16M24 35v8"/>' },
+    { key: 'cameras',     label: 'Cameras',         a: '#f0cc6a', b: '#c98f12', icon: '<rect x="5" y="14" width="38" height="27" rx="5"/><circle cx="24" cy="27" r="8"/><path d="M16 14l2-5h10l2 5"/>' },
+    { key: 'appliances',  label: 'Home Appliances', a: '#9bb4d6', b: '#4d6b99', icon: '<rect x="9" y="4" width="30" height="40" rx="4"/><circle cx="24" cy="28" r="9"/><circle cx="24" cy="28" r="4.5"/><path d="M14 10h4M22 10h2"/>' }
   ];
   var CAT_BY_KEY = {};
   CATEGORIES.forEach(function (c) { CAT_BY_KEY[c.key] = c; });
 
-  /* ---------- 2. SAMPLE CATALOGUE (SAMPLE DEMO DATA) ----------
-     EXTENSION POINT: to connect real data later, replace getProducts()
-     below with a fetch() to your own API and keep this object shape:
+  /* SAMPLE CATALOGUE – every price, MRP and rating below is INVENTED for demonstration.
+     EXTENSION POINT: replace getProducts() with a fetch() to your own API, keeping this shape:
        { id, name, cat, rating, reviews, mrp, tags, offers:[{r,p,d,a,url?}] }
-     "a" (availability) must be one of: 'In stock' | 'Limited stock' | 'Out of stock'.
-     Every price, MRP and rating below is invented for demonstration. */
+     "a" (availability) is 'In stock' | 'Limited stock' | 'Out of stock'. */
   function O(r, p, d, a) { return { r: r, p: p, d: d, a: a }; }
 
   var PRODUCTS = [
@@ -724,10 +1268,9 @@ section{padding:72px 0}
       offers: [O('Reliance Digital',31990,'Free delivery + installation','In stock'),O('Croma',32990,'Free delivery + installation','In stock'),O('Amazon',33490,'Free delivery','Limited stock')] }
   ];
 
-  /* Placeholder for future real data source (see EXTENSION POINT above) */
-  function getProducts() { return PRODUCTS; }
+  function getProducts() { return PRODUCTS; }   // <- swap for a real data source later
 
-  /* Pre-compute lowest price, discount and a "haystack" string for search */
+  // Pre-compute lowest in-stock offer, discount vs sample list price, and a search "haystack"
   getProducts().forEach(function (p) {
     var avail = p.offers.filter(function (o) { return o.a !== 'Out of stock'; });
     var pool = avail.length ? avail : p.offers;
@@ -736,15 +1279,19 @@ section{padding:72px 0}
     p.hay = (p.name + ' ' + CAT_BY_KEY[p.cat].label + ' ' + p.cat + ' ' + p.tags).toLowerCase();
   });
 
-  /* Search synonyms so "phone", "tv", "earbuds" etc. work */
+  // Search synonyms so "phone", "tv", "earbuds" etc. find the right category
   var SYNONYMS = {
     phone: 'smartphones', phones: 'smartphones', mobile: 'smartphones', mobiles: 'smartphones', smartphone: 'smartphones',
     laptop: 'laptops', notebook: 'laptops', headphone: 'headphones', earphones: 'headphones', earbuds: 'headphones', headset: 'headphones',
     watch: 'smartwatches', watches: 'smartwatches', smartwatch: 'smartwatches', tablet: 'tablets', tv: 'televisions',
-    television: 'televisions', camera: 'cameras', appliance: 'appliances', washer: 'appliances', 'washing': 'appliances'
+    television: 'televisions', camera: 'cameras', appliance: 'appliances', washer: 'appliances', washing: 'appliances'
   };
+  /* END JS SHARED A: CONFIG & SAMPLE DATA */
 
-  /* ---------- 3. HELPERS ---------- */
+
+  /* ===============================================================
+     START JS SHARED B: HELPERS, EVENTS BUS & LAYER MANAGER
+     =============================================================== */
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
 
@@ -759,438 +1306,50 @@ section{padding:72px 0}
   function byId(id) { return getProducts().filter(function (p) { return p.id === id; })[0]; }
   function isValidUrl(u) {
     if (!u || typeof u !== 'string') return false;
-    try { var x = new URL(u); return x.protocol === 'https:'; } catch (e) { return false; }
+    try { return new URL(u).protocol === 'https:'; } catch (e) { return false; }
   }
-  function offerUrl(o) { return isValidUrl(o.url) ? o.url : (RETAILERS[o.r] && isValidUrl(RETAILERS[o.r].url) ? RETAILERS[o.r].url : ''); }
-  function retailerColor(name) { return (RETAILERS[name] && RETAILERS[name].color) || '#5b6f67'; }
-  function catIcon(key, cls) {
-    return '<svg class="' + (cls || '') + '" viewBox="0 0 48 48" aria-hidden="true">' + CAT_BY_KEY[key].icon + '</svg>';
+  function reducedMotion() { return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); }
+  function scrollToId(id) {
+    var el = document.getElementById(id); if (!el) return;
+    el.scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'start' });
   }
+
+  // Shared icon snippets
+  function catIcon(key, cls) { return '<svg class="' + (cls || '') + '" viewBox="0 0 48 48" aria-hidden="true">' + CAT_BY_KEY[key].icon + '</svg>'; }
   function tileStyle(key) { return '--tile-a:' + CAT_BY_KEY[key].a + ';--tile-b:' + CAT_BY_KEY[key].b; }
-  function availClass(a) { return a === 'In stock' ? 'avail-in' : a === 'Limited stock' ? 'avail-low' : 'avail-out'; }
-  var STAR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.500l2.900 6 6.600.9-4.800 4.600 1.200 6.500L12 17.300 6.100 20.500l1.200-6.500L2.500 9.400l6.600-.9z"/></svg>';
-  var HEART = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.500-4.600-9.300-9.200C1.400 8.400 3.400 5 6.800 5c2 0 3.400 1.100 5.200 3 1.800-1.900 3.200-3 5.200-3 3.400 0 5.400 3.400 4.100 6.800C19.500 16.400 12 21 12 21z"/></svg>';
+  var STAR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.3 6.1 20.5l1.2-6.5L2.5 9.4l6.6-.9z"/></svg>';
 
-  var toastTimer;
-  function toast(msg) {
-    var t = $('#toast');
-    t.textContent = msg;
-    t.classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(function () { t.classList.remove('show'); }, 2600);
-  }
-
-  /* ---------- 4. STATE + WATCHLIST (localStorage) ---------- */
-  var state = { query: '', cat: 'all', sort: 'relevance', watch: loadWatch() };
-
-  function loadWatch() {
-    try {
-      var raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-      if (!Array.isArray(raw)) return [];
-      return raw.filter(function (id, i) { return typeof id === 'string' && raw.indexOf(id) === i && byId(id); });
-    } catch (e) { return []; }              // storage blocked/unavailable → start empty
-  }
-  function saveWatch() {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state.watch)); }
-    catch (e) { /* storage unavailable (private mode etc.) – watchlist works for this visit only */ }
-  }
-  function inWatch(id) { return state.watch.indexOf(id) !== -1; }
-
-  function toggleWatch(id) {
-    var p = byId(id); if (!p) return;
-    if (inWatch(id)) {
-      state.watch = state.watch.filter(function (x) { return x !== id; });
-      toast('Removed from watchlist');
-    } else {
-      state.watch.push(id);
-      toast('Added to watchlist (saved in this browser)');
-    }
-    saveWatch();
-    refreshWatchUI();
-  }
-
-  /* Re-sync every watchlist-dependent piece of UI without a full re-render */
-  function refreshWatchUI() {
-    var n = state.watch.length, c = $('#watchCount');
-    c.textContent = n;
-    c.classList.remove('bump'); void c.offsetWidth; c.classList.add('bump');
-    $('#watchBtn').setAttribute('aria-label', 'Open watchlist, ' + n + (n === 1 ? ' item' : ' items'));
-    $$('.wl-btn').forEach(function (b) {
-      var on = inWatch(b.dataset.id);
-      b.setAttribute('aria-pressed', on ? 'true' : 'false');
-      b.setAttribute('aria-label', (on ? 'Remove ' : 'Add ') + byId(b.dataset.id).name + (on ? ' from' : ' to') + ' watchlist');
-    });
-    $$('[data-modal-watch]').forEach(function (b) {
-      var on = inWatch(b.dataset.modalWatch);
-      b.textContent = on ? '♥ In watchlist – remove' : '♡ Add to watchlist';
-    });
-    renderDrawer();
-  }
-
-  /* ---------- 5. RENDERING ---------- */
-  function renderCategories() {
-    $('#catGrid').innerHTML = CATEGORIES.map(function (c) {
-      var count = getProducts().filter(function (p) { return p.cat === c.key; }).length;
-      return '<button type="button" class="cat-card reveal" data-cat="' + c.key + '" aria-label="Show ' + esc(c.label) + ' (' + count + ' sample products)">' +
-        '<span class="cat-icon"><svg viewBox="0 0 48 48" aria-hidden="true">' + c.icon + '</svg></span>' +
-        '<span>' + esc(c.label) + '</span><small>' + count + ' sample items</small></button>';
-    }).join('');
-
-    $('#chipRow').innerHTML = '<button type="button" class="chip" data-chip="all">All</button>' +
-      CATEGORIES.map(function (c) { return '<button type="button" class="chip" data-chip="' + c.key + '">' + esc(c.label) + '</button>'; }).join('');
-
-    $('#footerCats').innerHTML = CATEGORIES.map(function (c) {
-      return '<li><a href="#products" data-footcat="' + c.key + '">' + esc(c.label) + '</a></li>';
-    }).join('');
-  }
-
-  function syncCategoryUI() {
-    $$('.cat-card').forEach(function (b) { b.classList.toggle('active', b.dataset.cat === state.cat); });
-    $$('#chipRow .chip').forEach(function (b) {
-      var on = b.dataset.chip === state.cat;
-      b.classList.toggle('active', on); b.setAttribute('aria-pressed', on ? 'true' : 'false');
-    });
-  }
-
-  /* Product visual: inline SVG tile. If an optional p.image URL is ever added
-     and fails to load, the onerror handler swaps in the SVG fallback. */
+  // Product visual: SVG tile. If an optional p.image URL is ever added and fails to load,
+  // attachImageFallbacks() swaps in the SVG placeholder.
   function mediaHTML(p) {
-    var fallback = catIcon(p.cat, 'vis');
-    if (p.image) {
-      return '<img src="' + esc(p.image) + '" alt="' + esc(p.name) + '" loading="lazy" data-fallback="1">';
-    }
-    return fallback;
+    if (p.image) return '<img src="' + esc(p.image) + '" alt="' + esc(p.name) + '" loading="lazy" data-fallback="1">';
+    return catIcon(p.cat, 'vis');
   }
-
-  function productCard(p) {
-    var offers = p.offers.slice().sort(function (a, b) { return a.p - b.p; }).slice(0, 3);
-    var mini = offers.map(function (o) {
-      var low = o === p.lowest || (o.r === p.lowest.r && o.p === p.lowest.p);
-      return '<li class="' + (low ? 'low' : '') + '"><span>' + esc(o.r) + '</span><span>' + fmt(o.p) + '</span></li>';
-    }).join('');
-    var on = inWatch(p.id);
-    return '<article class="card reveal" data-id="' + p.id + '">' +
-      '<div class="card-media" style="' + tileStyle(p.cat) + '">' + mediaHTML(p) +
-        '<span class="tag-sample">Sample data</span>' +
-        '<button type="button" class="wl-btn" data-id="' + p.id + '" aria-pressed="' + on + '" aria-label="' + (on ? 'Remove ' : 'Add ') + esc(p.name) + (on ? ' from' : ' to') + ' watchlist">' + HEART + '</button>' +
-      '</div>' +
-      '<div class="card-body">' +
-        '<span class="cat-label">' + esc(CAT_BY_KEY[p.cat].label) + '</span>' +
-        '<h3>' + esc(p.name) + '</h3>' +
-        '<div class="rating">' + STAR + '<b>' + p.rating.toFixed(1) + '</b><span>(' + esc(p.reviews) + ' sample ratings)</span></div>' +
-        '<div class="price-row"><span class="price">' + fmt(p.lowest.p) + '</span><span class="lowest-note">lowest sample price</span></div>' +
-        '<ul class="offer-mini" aria-label="Sample offers">' + mini + '</ul>' +
-        '<div class="card-actions"><button type="button" class="btn btn-primary btn-sm" data-compare="' + p.id + '">Compare Prices</button></div>' +
-      '</div></article>';
-  }
-
-  function dealCard(p) {
-    return '<article class="card deal-card reveal" data-id="' + p.id + '">' +
-      '<div class="card-media" style="' + tileStyle(p.cat) + '">' + mediaHTML(p) +
-        '<span class="tag-sample">Demo discount</span>' +
-        '<span class="deal-ribbon">' + p.discount + '% OFF</span></div>' +
-      '<div class="card-body">' +
-        '<span class="cat-label">' + esc(CAT_BY_KEY[p.cat].label) + '</span>' +
-        '<h3>' + esc(p.name) + '</h3>' +
-        '<div class="price-row"><span class="price">' + fmt(p.lowest.p) + '</span><span class="price-old">' + fmt(p.mrp) + '</span><span class="off">' + p.discount + '% off</span></div>' +
-        '<span class="lowest-note">Sample price at ' + esc(p.lowest.r) + ' • sample list price shown struck through</span>' +
-        '<div class="card-actions"><button type="button" class="btn btn-primary btn-sm" data-compare="' + p.id + '">View Deal</button></div>' +
-      '</div></article>';
-  }
-
-  function renderDeals() {
-    var top = getProducts().slice().sort(function (a, b) { return b.discount - a.discount; }).slice(0, 4);
-    $('#dealGrid').innerHTML = top.map(dealCard).join('');
-  }
-
-  /* ---------- 6. SEARCH + FILTERING ---------- */
-  function normalise(q) { return q.toLowerCase().replace(/[^a-z0-9\s."-]/g, ' ').trim(); }
-
-  function matches(p, q) {
-    if (!q) return true;
-    var tokens = normalise(q).split(/\s+/).filter(Boolean);
-    return tokens.every(function (t) {
-      // match at the START of a word, so "phone" does not match "headphones"
-      var re = new RegExp('(^|[^a-z0-9])' + t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
-      if (re.test(p.hay)) return true;
-      var syn = SYNONYMS[t];
-      return !!(syn && p.cat === syn);
-    });
-  }
-
-  function getResults() {
-    var list = getProducts().filter(function (p) {
-      return (state.cat === 'all' || p.cat === state.cat) && matches(p, state.query);
-    });
-    switch (state.sort) {
-      case 'price-asc':  list.sort(function (a, b) { return a.lowest.p - b.lowest.p; }); break;
-      case 'price-desc': list.sort(function (a, b) { return b.lowest.p - a.lowest.p; }); break;
-      case 'rating':     list.sort(function (a, b) { return b.rating - a.rating; }); break;
-      case 'discount':   list.sort(function (a, b) { return b.discount - a.discount; }); break;
-    }
-    return list;
-  }
-
-  function renderProducts() {
-    var list = getResults(), grid = $('#productGrid'), info = $('#resultsInfo');
-    var q = state.query.trim(), catLabel = state.cat === 'all' ? '' : CAT_BY_KEY[state.cat].label;
-
-    if (!list.length) {
-      grid.innerHTML = '<div class="empty"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.500-3.500M8.500 11h5"/></svg>' +
-        '<h3>No products found</h3><p>' + (q ? 'We couldn’t find a sample product matching “' + esc(q) + '”' + (catLabel ? ' in ' + esc(catLabel) : '') + '. ' : 'Nothing to show for this filter. ') +
-        'Try a different word such as “phone”, “laptop” or “tv”, or browse all categories.</p>' +
-        '<button type="button" class="btn btn-primary" data-reset="1">Clear search &amp; filters</button></div>';
-      info.innerHTML = '';
-    } else {
-      grid.innerHTML = list.map(productCard).join('');
-      var bits = list.length + (list.length === 1 ? ' product' : ' products');
-      if (q) bits += ' for “' + esc(q) + '”';
-      if (catLabel) bits += ' in ' + esc(catLabel);
-      info.innerHTML = '<span>Showing ' + bits + '</span>' + ((q || catLabel) ? '<button type="button" class="link-btn" data-reset="1">Clear search &amp; filters</button>' : '');
-    }
-    syncCategoryUI();
-    attachImageFallbacks();
-    observeReveals();
-    refreshWatchUI();
-  }
-
-  /* If a (future) external product image fails, swap in the SVG placeholder */
-  function attachImageFallbacks() {
-    $$('img[data-fallback]').forEach(function (img) {
+  function attachImageFallbacks(root) {
+    $$('img[data-fallback]', root).forEach(function (img) {
       img.addEventListener('error', function () {
-        var card = img.closest('.card'); var p = byId(card.dataset.id);
-        img.outerHTML = catIcon(p.cat, 'vis');
+        var card = img.closest('.card'); var p = card && byId(card.dataset.id);
+        if (p) img.outerHTML = catIcon(p.cat, 'vis');
       }, { once: true });
     });
   }
 
-  function setQuery(q) {
-    state.query = q;
-    var input = $('#searchInput');
-    if (input.value !== q) input.value = q;
-    $('#searchClear').classList.toggle('show', !!q);
-    renderProducts();
-  }
-  function resetAll() {
-    state.cat = 'all'; state.sort = 'relevance'; $('#sortSelect').value = 'relevance';
-    setQuery('');
-  }
-  function scrollToProducts() {
-    var el = $('#products'); if (!el) return;
-    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    el.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+  // Toast
+  var toastTimer;
+  function toast(msg) {
+    var t = $('#toast'); t.textContent = msg; t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.classList.remove('show'); }, 2600);
   }
 
-  /* ---------- 7. LAYER MANAGER (modal + drawer) ---------- */
-  var layer = { el: null, trigger: null };
-  var FOCUSABLE = 'a[href],button:not([disabled]),input,select,textarea,[tabindex]:not([tabindex="-1"])';
+  // Tiny events bus (see the event list at the top of SECTION 16)
+  var Bus = {
+    h: {},
+    on: function (e, f) { (this.h[e] = this.h[e] || []).push(f); },
+    emit: function (e, d) { (this.h[e] || []).forEach(function (f) { f(d); }); }
+  };
 
-  function openLayer(el, trigger) {
-    if (layer.el) closeLayer(true);
-    layer.el = el; layer.trigger = trigger || document.activeElement;
-    $('#overlay').classList.add('open');
-    el.classList.add('open');
-    document.body.classList.add('no-scroll');
-    var first = $$(FOCUSABLE, el)[0];
-    setTimeout(function () { (first || el).focus(); }, 30);
-  }
-  function closeLayer(silent) {
-    if (!layer.el) return;
-    layer.el.classList.remove('open');
-    $('#overlay').classList.remove('open');
-    document.body.classList.remove('no-scroll');
-    var t = layer.trigger; layer.el = null; layer.trigger = null;
-    if (!silent && t && document.contains(t)) t.focus();
-  }
-
-  /* Compare modal */
-  function openCompare(id, trigger) {
-    var p = byId(id); if (!p) return;
-    var offers = p.offers.slice().sort(function (a, b) {
-      var ao = a.a === 'Out of stock' ? 1 : 0, bo = b.a === 'Out of stock' ? 1 : 0;
-      return ao - bo || a.p - b.p;
-    });
-    var highest = Math.max.apply(null, p.offers.map(function (o) { return o.p; }));
-    var anyLink = false;
-
-    var rows = offers.map(function (o) {
-      var isBest = o.r === p.lowest.r && o.p === p.lowest.p;
-      var url = offerUrl(o); if (url) anyLink = true;
-      return '<li class="offer' + (isBest ? ' best' : '') + (o.a === 'Out of stock' ? ' oos' : '') + '">' +
-        '<span class="dot" style="background:' + retailerColor(o.r) + '" aria-hidden="true">' + esc(o.r.charAt(0)) + '</span>' +
-        '<div><b>' + esc(o.r) + '</b><small>' + esc(o.d) + '</small><small class="' + availClass(o.a) + '">' + esc(o.a) + '</small></div>' +
-        '<div class="offer-right">' + (isBest ? '<span class="best-tag">Lowest sample price</span><br>' : '') +
-          '<span class="p">' + fmt(o.p) + '</span>' +
-          (isBest && highest > o.p ? '<small style="display:block;color:var(--ink-mute)">' + fmt(highest - o.p) + ' below highest sample offer</small>' : '') +
-          (url ? '<br><a class="btn btn-primary btn-sm" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer sponsored">Visit Store</a>' : '') +
-        '</div></li>';
-    }).join('');
-
-    var m = $('#compareModal');
-    m.innerHTML =
-      '<div class="modal-head">' +
-        '<div class="modal-thumb" style="' + tileStyle(p.cat) + '">' + catIcon(p.cat) + '</div>' +
-        '<div><span class="cat-label">' + esc(CAT_BY_KEY[p.cat].label) + '</span><h2 id="modalTitle">' + esc(p.name) + '</h2>' +
-        '<div class="rating">' + STAR + '<b>' + p.rating.toFixed(1) + '</b><span>(' + esc(p.reviews) + ' sample ratings)</span></div></div>' +
-        '<button type="button" class="modal-close" data-close aria-label="Close comparison">×</button>' +
-      '</div>' +
-      '<div class="modal-body">' +
-        '<span class="sample-pill">Sample demo offers – not live prices</span>' +
-        '<ul class="offers" aria-label="Sample offers for ' + esc(p.name) + '">' + rows + '</ul>' +
-        '<div class="modal-foot">' +
-          '<button type="button" class="btn btn-soft" data-modal-watch="' + p.id + '">' + (inWatch(p.id) ? '♥ In watchlist – remove' : '♡ Add to watchlist') + '</button>' +
-          '<button type="button" class="btn btn-ghost" data-close>Close</button>' +
-        '</div>' +
-        '<p class="fine">Sample list price: ' + fmt(p.mrp) + '. Prices, delivery details and availability above are invented for demonstration and may not match any real retailer. ' +
-          (anyLink ? '' : 'Store links are not configured in this demo, so no “Visit Store” buttons are shown.') + '</p>' +
-      '</div>';
-    openLayer(m, trigger);
-  }
-
-  /* Watchlist drawer */
-  function renderDrawer() {
-    var body = $('#drawerBody'), foot = $('#drawerFoot');
-    if (!state.watch.length) {
-      body.innerHTML = '<div class="empty" style="border:0;padding:40px 10px"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.500-4.600-9.300-9.200C1.400 8.400 3.400 5 6.800 5c2 0 3.400 1.100 5.200 3 1.800-1.900 3.200-3 5.200-3 3.400 0 5.400 3.400 4.100 6.800C19.500 16.400 12 21 12 21z"/></svg>' +
-        '<h3>Your watchlist is empty</h3><p>Tap the heart on any product to save it here.</p>' +
-        '<button type="button" class="btn btn-primary" data-close data-goto-products="1">Browse products</button></div>';
-      foot.innerHTML = '';
-      return;
-    }
-    body.innerHTML = state.watch.map(function (id) {
-      var p = byId(id);
-      return '<div class="wl-item"><div class="wl-thumb" style="' + tileStyle(p.cat) + '">' + catIcon(p.cat) + '</div><div>' +
-        '<h3>' + esc(p.name) + '</h3><div class="meta">' + esc(CAT_BY_KEY[p.cat].label) + ' • from ' + fmt(p.lowest.p) + ' <em>(sample)</em></div>' +
-        '<div class="row"><button type="button" class="btn btn-soft btn-sm" data-compare="' + p.id + '">Compare</button>' +
-        '<button type="button" class="btn btn-ghost btn-sm" data-remove="' + p.id + '" aria-label="Remove ' + esc(p.name) + ' from watchlist">Remove</button></div></div></div>';
-    }).join('');
-    foot.innerHTML = '<button type="button" class="btn btn-ghost btn-sm" data-clear-watch>Clear watchlist</button>' +
-      '<p>Saved only in this browser. Price-drop alerts are not available in this demo.</p>';
-  }
-
-  /* ---------- 8. EVENT WIRING ---------- */
-  function setMenu(open) {
-    $('#mainNav').classList.toggle('open', open);
-    var t = $('#menuToggle');
-    t.setAttribute('aria-expanded', open ? 'true' : 'false');
-    t.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
-    $('#menuIcon').innerHTML = open ? '<path d="M6 6l12 12M18 6L6 18"/>' : '<path d="M4 7h16M4 12h16M4 17h16"/>';
-  }
-
-  function init() {
-    renderCategories();
-    renderDeals();
-    renderProducts();
-    $('#year').textContent = new Date().getFullYear();
-
-    /* Search form */
-    $('#searchForm').addEventListener('submit', function (e) {
-      e.preventDefault();
-      state.cat = 'all';
-      setQuery($('#searchInput').value);
-      scrollToProducts();
-    });
-    $('#searchInput').addEventListener('input', function (e) { setQuery(e.target.value); });
-    $('#searchClear').addEventListener('click', function () { setQuery(''); $('#searchInput').focus(); });
-
-    /* Header search icon → focus the main search box */
-    $('#headerSearchBtn').addEventListener('click', function () {
-      var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      $('#home').scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' });
-      setMenu(false);
-      setTimeout(function () { $('#searchInput').focus({ preventScroll: true }); }, reduce ? 0 : 450);
-    });
-
-    /* Sort */
-    $('#sortSelect').addEventListener('change', function (e) { state.sort = e.target.value; renderProducts(); });
-
-    /* Mobile menu */
-    $('#menuToggle').addEventListener('click', function () { setMenu(!$('#mainNav').classList.contains('open')); });
-    $$('#mainNav a').forEach(function (a) { a.addEventListener('click', function () { setMenu(false); }); });
-
-    /* Watchlist drawer open/close */
-    $('#watchBtn').addEventListener('click', function (e) { renderDrawer(); openLayer($('#watchDrawer'), e.currentTarget); });
-    $('#drawerClose').addEventListener('click', function () { closeLayer(); });
-    $('#overlay').addEventListener('click', function () { closeLayer(); });
-
-    /* Delegated clicks for everything dynamic */
-    document.addEventListener('click', function (e) {
-      var t = e.target;
-
-      var chipSearch = t.closest('[data-search]');
-      if (chipSearch) { state.cat = 'all'; setQuery(chipSearch.dataset.search); scrollToProducts(); return; }
-
-      var cat = t.closest('[data-cat]');
-      if (cat) { state.cat = state.cat === cat.dataset.cat ? 'all' : cat.dataset.cat; setQuery(''); scrollToProducts(); return; }
-
-      var chip = t.closest('[data-chip]');
-      if (chip) { state.cat = chip.dataset.chip; renderProducts(); return; }
-
-      var foot = t.closest('[data-footcat]');
-      if (foot) { state.cat = foot.dataset.footcat; setQuery(''); return; } /* anchor handles scroll */
-
-      var cmp = t.closest('[data-compare]');
-      if (cmp) { var trig = cmp; if (layer.el === $('#watchDrawer')) trig = $('#watchBtn'); openCompare(cmp.dataset.compare, trig); return; }
-
-      var wl = t.closest('.wl-btn');
-      if (wl) { toggleWatch(wl.dataset.id); return; }
-
-      var mw = t.closest('[data-modal-watch]');
-      if (mw) { toggleWatch(mw.dataset.modalWatch); return; }
-
-      var rm = t.closest('[data-remove]');
-      if (rm) { toggleWatch(rm.dataset.remove); return; }
-
-      if (t.closest('[data-clear-watch]')) {
-        state.watch = []; saveWatch(); refreshWatchUI(); toast('Watchlist cleared'); return;
-      }
-      if (t.closest('[data-reset]')) { resetAll(); return; }
-
-      if (t.closest('[data-close]')) {
-        var goto = t.closest('[data-goto-products]');
-        closeLayer(); if (goto) scrollToProducts(); return;
-      }
-
-      var ph = t.closest('[data-placeholder]');
-      if (ph) { e.preventDefault(); toast(ph.dataset.placeholder + ' is a placeholder in this demo.'); return; }
-    });
-
-    /* Keyboard: Esc closes layers/menu; Tab is trapped inside an open layer */
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape') {
-        if (layer.el) { closeLayer(); return; }
-        if ($('#mainNav').classList.contains('open')) { setMenu(false); $('#menuToggle').focus(); }
-      }
-      if (e.key === 'Tab' && layer.el) {
-        var f = $$(FOCUSABLE, layer.el).filter(function (n) { return n.offsetParent !== null; });
-        if (!f.length) { e.preventDefault(); return; }
-        var first = f[0], last = f[f.length - 1];
-        if (e.shiftKey && (document.activeElement === first || document.activeElement === layer.el)) { e.preventDefault(); last.focus(); }
-        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
-      }
-    });
-
-    /* Sticky header shadow + active nav link on scroll */
-    var header = $('#siteHeader');
-    var sections = ['home', 'categories', 'deals', 'how-it-works'].map(function (id) { return document.getElementById(id); });
-    var links = $$('.nav-list a');
-    function onScroll() {
-      header.classList.toggle('scrolled', window.scrollY > 8);
-      var y = window.scrollY + 140, current = 'home';
-      sections.forEach(function (s) { if (s && s.offsetTop <= y) current = s.id; });
-      if (document.getElementById('products').offsetTop <= y && document.getElementById('deals').offsetTop > y) current = 'categories';
-      links.forEach(function (a) { a.classList.toggle('active', a.getAttribute('href') === '#' + current); });
-    }
-    window.addEventListener('scroll', onScroll, { passive: true });
-    onScroll();
-
-    /* Close mobile menu when resizing to desktop */
-    window.addEventListener('resize', function () { if (window.innerWidth > 860) setMenu(false); });
-
-    observeReveals();
-  }
-
-  /* Scroll-reveal animation (disabled via CSS for reduced-motion users) */
+  // Scroll-reveal animation (disabled via CSS for reduced-motion users)
   var io = null;
   function observeReveals() {
     var items = $$('.reveal:not(.in)');
@@ -1203,11 +1362,708 @@ section{padding:72px 0}
     items.forEach(function (n) { io.observe(n); });
   }
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+  // Layer manager: one open dialog at a time (compare modal OR watchlist drawer).
+  // Handles overlay, scroll lock, focus return, Esc and Tab trapping.
+  var Layer = (function () {
+    var current = null, trigger = null;
+    var FOCUSABLE = 'a[href],button:not([disabled]),input,select,textarea,[tabindex]:not([tabindex="-1"])';
+    function open(el, t) {
+      if (current) close(true);
+      current = el; trigger = t || document.activeElement;
+      $('#overlay').classList.add('open');
+      el.classList.add('open');
+      document.body.classList.add('no-scroll');
+      var first = $$(FOCUSABLE, el)[0];
+      setTimeout(function () { (first || el).focus(); }, 30);
+    }
+    function close(silent) {
+      if (!current) return;
+      current.classList.remove('open');
+      $('#overlay').classList.remove('open');
+      document.body.classList.remove('no-scroll');
+      var t = trigger; current = null; trigger = null;
+      if (!silent && t && document.contains(t)) t.focus();
+    }
+    function init() {
+      $('#overlay').addEventListener('click', function () { close(); });
+      document.addEventListener('click', function (e) { if (e.target.closest('[data-close]')) close(); });
+      document.addEventListener('keydown', function (e) {
+        if (!current) return;
+        if (e.key === 'Escape') { close(); return; }
+        if (e.key === 'Tab') {
+          var f = $$(FOCUSABLE, current).filter(function (n) { return n.offsetParent !== null; });
+          if (!f.length) { e.preventDefault(); return; }
+          var first = f[0], last = f[f.length - 1];
+          if (e.shiftKey && (document.activeElement === first || document.activeElement === current)) { e.preventDefault(); last.focus(); }
+          else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+        }
+      });
+    }
+    return { open: open, close: close, init: init, isOpen: function () { return !!current; }, current: function () { return current; } };
+  })();
+  /* END JS SHARED B: HELPERS, EVENTS BUS & LAYER MANAGER */
 
-  /* Small debugging/extension surface (no side effects) */
-  window.ValueD = { getProducts: getProducts, state: state, fmt: fmt };
+
+  /* ===============================================================
+     START JS SECTION 01: LOGO & BRANDING
+     Copies the template "vd-lockup-template" into every [data-brand-lockup].
+     DEPENDS ON: HTML SECTION 01 (template + symbol).
+     =============================================================== */
+  var Logo = (function () {
+    function init() {
+      var tpl = $('#vd-lockup-template');
+      if (!tpl || !tpl.content) return;               // keeps the plain-text fallback
+      $$('[data-brand-lockup]').forEach(function (el) {
+        el.innerHTML = '';
+        el.appendChild(tpl.content.cloneNode(true));
+      });
+    }
+    return { init: init };
+  })();
+  /* END JS SECTION 01: LOGO & BRANDING */
+
+
+  /* ===============================================================
+     START JS SECTION 02: HEADER & NAVIGATION
+     Mobile menu, sticky-header shadow, active nav link while scrolling,
+     header search icon.
+     DEPENDS ON: Bus ('search:focus' is handled by Section 03).
+     =============================================================== */
+  var Header = (function () {
+    function setMenu(open) {
+      $('#mainNav').classList.toggle('open', open);
+      var t = $('#menuToggle');
+      t.setAttribute('aria-expanded', open ? 'true' : 'false');
+      t.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+      $('#menuIcon').innerHTML = open ? '<path d="M6 6l12 12M18 6L6 18"/>' : '<path d="M4 7h16M4 12h16M4 17h16"/>';
+    }
+    function init() {
+      $('#menuToggle').addEventListener('click', function () { setMenu(!$('#mainNav').classList.contains('open')); });
+      $$('#mainNav a').forEach(function (a) { a.addEventListener('click', function () { setMenu(false); }); });
+      window.addEventListener('resize', function () { if (window.innerWidth > 860) setMenu(false); });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && $('#mainNav').classList.contains('open')) { setMenu(false); $('#menuToggle').focus(); }
+      });
+
+      // Header search icon: go to the hero search box and focus it
+      $('#headerSearchBtn').addEventListener('click', function () {
+        scrollToId('home'); setMenu(false);
+        setTimeout(function () { Bus.emit('search:focus'); }, reducedMotion() ? 0 : 450);
+      });
+
+      // Sticky header shadow + active nav link
+      var header = $('#siteHeader');
+      var links = $$('.nav-list a');
+      function onScroll() {
+        header.classList.toggle('scrolled', window.scrollY > 8);
+        var y = window.scrollY + 140, current = 'home';
+        ['home', 'categories', 'deals', 'how-it-works'].forEach(function (id) {
+          var s = document.getElementById(id); if (s && s.offsetTop <= y) current = id;
+        });
+        var prod = document.getElementById('products'), deals = document.getElementById('deals');
+        if (prod && deals && prod.offsetTop <= y && deals.offsetTop > y) current = 'categories';
+        var about = document.getElementById('about');
+        if (about && about.offsetTop <= y) current = null;     // past "How It Works": no main-nav item active
+        links.forEach(function (a) { a.classList.toggle('active', a.getAttribute('href') === '#' + current); });
+      }
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+    }
+    return { init: init };
+  })();
+  /* END JS SECTION 02: HEADER & NAVIGATION */
+
+
+  /* ===============================================================
+     START JS SECTION 03: HOMEPAGE
+     Hero search box, clear button, popular-search chips.
+     DEPENDS ON: Bus ('search:set' -> Section 05; listens for
+     'search:changed' and 'search:focus').
+     =============================================================== */
+  var Home = (function () {
+    function init() {
+      var input = $('#searchInput'), clear = $('#searchClear');
+
+      $('#searchForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        Bus.emit('search:set', { query: input.value, cat: 'all', scroll: true });
+      });
+      input.addEventListener('input', function () { Bus.emit('search:set', { query: input.value }); });
+      clear.addEventListener('click', function () { Bus.emit('search:set', { query: '' }); input.focus(); });
+
+      $$('[data-search]').forEach(function (chip) {
+        chip.addEventListener('click', function () {
+          Bus.emit('search:set', { query: chip.dataset.search, cat: 'all', scroll: true });
+        });
+      });
+
+      Bus.on('search:changed', function (d) {
+        if (input.value !== d.query) input.value = d.query;
+        clear.classList.toggle('show', !!d.query);
+      });
+      Bus.on('search:focus', function () { input.focus({ preventScroll: true }); });
+    }
+    return { init: init };
+  })();
+  /* END JS SECTION 03: HOMEPAGE */
+
+
+  /* ===============================================================
+     START JS SECTION 04: PRODUCT CATEGORIES
+     Category cards (click = filter the product list; click again = show all).
+     DEPENDS ON: CATEGORIES (SHARED A), Bus ('category:toggle' -> Section 05;
+     listens for 'category:changed').
+     =============================================================== */
+  var Categories = (function () {
+    function render() {
+      $('#catGrid').innerHTML = CATEGORIES.map(function (c) {
+        var count = getProducts().filter(function (p) { return p.cat === c.key; }).length;
+        return '<button type="button" class="cat-card reveal" data-cat="' + c.key + '" aria-label="Show ' + esc(c.label) + ' (' + count + ' sample products)">' +
+          '<span class="cat-icon"><svg viewBox="0 0 48 48" aria-hidden="true">' + c.icon + '</svg></span>' +
+          '<span>' + esc(c.label) + '</span><small>' + count + ' sample items</small></button>';
+      }).join('');
+    }
+    function init() {
+      render();
+      $('#catGrid').addEventListener('click', function (e) {
+        var card = e.target.closest('[data-cat]');
+        if (card) Bus.emit('category:toggle', { cat: card.dataset.cat });
+      });
+      Bus.on('category:changed', function (d) {
+        $$('.cat-card').forEach(function (b) { b.classList.toggle('active', b.dataset.cat === d.cat); });
+      });
+    }
+    return { init: init };
+  })();
+  /* END JS SECTION 04: PRODUCT CATEGORIES */
+
+
+  /* ===============================================================
+     START JS SECTION 05: TRENDING PRODUCTS
+     Owns the product list: search matching, category filter, sorting,
+     product cards, "no results" state.
+     DEPENDS ON: SHARED A/B, Watch.has() (Section 08, to draw heart state),
+     Bus ('search:set', 'category:toggle'; emits 'search:changed',
+     'category:changed'; listens for 'watch:changed').
+     The Compare Prices button is handled by Section 07 (data-compare).
+     =============================================================== */
+  var Trending = (function () {
+    var st = { query: '', cat: 'all', sort: 'relevance' };
+    var HEART = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.3-9.2C1.4 8.4 3.4 5 6.8 5c2 0 3.4 1.1 5.2 3 1.8-1.9 3.2-3 5.2-3 3.4 0 5.4 3.4 4.1 6.8C19.5 16.4 12 21 12 21z"/></svg>';
+
+    // --- search matching (word-start match so "phone" does not match "headphones")
+    function matches(p, q) {
+      if (!q) return true;
+      var tokens = q.toLowerCase().replace(/[^a-z0-9\s."-]/g, ' ').trim().split(/\s+/).filter(Boolean);
+      return tokens.every(function (t) {
+        var re = new RegExp('(^|[^a-z0-9])' + t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+        if (re.test(p.hay)) return true;
+        var syn = SYNONYMS[t];
+        return !!(syn && p.cat === syn);
+      });
+    }
+    function getResults() {
+      var list = getProducts().filter(function (p) {
+        return (st.cat === 'all' || p.cat === st.cat) && matches(p, st.query);
+      });
+      switch (st.sort) {
+        case 'price-asc':  list.sort(function (a, b) { return a.lowest.p - b.lowest.p; }); break;
+        case 'price-desc': list.sort(function (a, b) { return b.lowest.p - a.lowest.p; }); break;
+        case 'rating':     list.sort(function (a, b) { return b.rating - a.rating; }); break;
+        case 'discount':   list.sort(function (a, b) { return b.discount - a.discount; }); break;
+      }
+      return list;
+    }
+
+    // --- product card
+    function card(p) {
+      var offers = p.offers.slice().sort(function (a, b) { return a.p - b.p; }).slice(0, 3);
+      var mini = offers.map(function (o) {
+        var low = o.r === p.lowest.r && o.p === p.lowest.p;
+        return '<li class="' + (low ? 'low' : '') + '"><span>' + esc(o.r) + '</span><span>' + fmt(o.p) + '</span></li>';
+      }).join('');
+      var on = Watch.has(p.id);
+      return '<article class="card reveal" data-id="' + p.id + '">' +
+        '<div class="card-media" style="' + tileStyle(p.cat) + '">' + mediaHTML(p) +
+          '<span class="tag-sample">Sample data</span>' +
+          '<button type="button" class="wl-btn" data-id="' + p.id + '" aria-pressed="' + on + '" aria-label="' + (on ? 'Remove ' : 'Add ') + esc(p.name) + (on ? ' from' : ' to') + ' watchlist">' + HEART + '</button>' +
+        '</div>' +
+        '<div class="card-body">' +
+          '<span class="cat-label">' + esc(CAT_BY_KEY[p.cat].label) + '</span>' +
+          '<h3>' + esc(p.name) + '</h3>' +
+          '<div class="rating">' + STAR + '<b>' + p.rating.toFixed(1) + '</b><span>(' + esc(p.reviews) + ' sample ratings)</span></div>' +
+          '<div class="price-row"><span class="price">' + fmt(p.lowest.p) + '</span><span class="lowest-note">lowest sample price</span></div>' +
+          '<ul class="offer-mini" aria-label="Sample offers">' + mini + '</ul>' +
+          '<div class="card-actions"><button type="button" class="btn btn-primary btn-sm" data-compare="' + p.id + '">Compare Prices</button></div>' +
+        '</div></article>';
+    }
+
+    function render() {
+      var list = getResults(), grid = $('#productGrid'), info = $('#resultsInfo');
+      var q = st.query.trim(), catLabel = st.cat === 'all' ? '' : CAT_BY_KEY[st.cat].label;
+
+      if (!list.length) {
+        grid.innerHTML = '<div class="empty"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5M8.5 11h5"/></svg>' +
+          '<h3>No products found</h3><p>' + (q ? 'We couldn’t find a sample product matching “' + esc(q) + '”' + (catLabel ? ' in ' + esc(catLabel) : '') + '. ' : 'Nothing to show for this filter. ') +
+          'Try a different word such as “phone”, “laptop” or “tv”, or browse all categories.</p>' +
+          '<button type="button" class="btn btn-primary" data-reset="1">Clear search &amp; filters</button></div>';
+        info.innerHTML = '';
+      } else {
+        grid.innerHTML = list.map(card).join('');
+        var bits = list.length + (list.length === 1 ? ' product' : ' products');
+        if (q) bits += ' for “' + esc(q) + '”';
+        if (catLabel) bits += ' in ' + esc(catLabel);
+        info.innerHTML = '<span>Showing ' + bits + '</span>' + ((q || catLabel) ? '<button type="button" class="link-btn" data-reset="1">Clear search &amp; filters</button>' : '');
+      }
+      $$('#chipRow .chip').forEach(function (b) {
+        var on = b.dataset.chip === st.cat;
+        b.classList.toggle('active', on); b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      });
+      attachImageFallbacks(grid);
+      observeReveals();
+      Bus.emit('category:changed', { cat: st.cat });
+    }
+
+    function setQuery(q) { st.query = q; Bus.emit('search:changed', { query: q }); render(); }
+    function reset() {
+      st.cat = 'all'; st.sort = 'relevance'; $('#sortSelect').value = 'relevance';
+      setQuery('');
+    }
+
+    function init() {
+      $('#chipRow').innerHTML = '<button type="button" class="chip" data-chip="all">All</button>' +
+        CATEGORIES.map(function (c) { return '<button type="button" class="chip" data-chip="' + c.key + '">' + esc(c.label) + '</button>'; }).join('');
+
+      $('#chipRow').addEventListener('click', function (e) {
+        var chip = e.target.closest('[data-chip]');
+        if (chip) { st.cat = chip.dataset.chip; render(); }
+      });
+      $('#sortSelect').addEventListener('change', function (e) { st.sort = e.target.value; render(); });
+      $('#products').addEventListener('click', function (e) { if (e.target.closest('[data-reset]')) reset(); });
+
+      // Events from other sections
+      Bus.on('search:set', function (d) {
+        if (d.cat !== undefined) st.cat = d.cat;
+        setQuery(d.query);
+        if (d.scroll) scrollToId('products');
+      });
+      Bus.on('category:toggle', function (d) {
+        st.cat = st.cat === d.cat ? 'all' : d.cat;
+        setQuery('');
+        scrollToId('products');
+      });
+      Bus.on('watch:changed', function () {
+        $$('#productGrid .wl-btn').forEach(function (b) {
+          var on = Watch.has(b.dataset.id), p = byId(b.dataset.id);
+          b.setAttribute('aria-pressed', on ? 'true' : 'false');
+          b.setAttribute('aria-label', (on ? 'Remove ' : 'Add ') + p.name + (on ? ' from' : ' to') + ' watchlist');
+        });
+      });
+      render();
+    }
+    return { init: init };
+  })();
+  /* END JS SECTION 05: TRENDING PRODUCTS */
+
+
+  /* ===============================================================
+     START JS SECTION 06: DEALS PAGE
+     Discount cards, deal filters (category + sort), show more/less.
+     DEPENDS ON: SHARED A/B. The "View Deal" button opens the Section 07
+     comparison modal (data-compare).
+     =============================================================== */
+  var Deals = (function () {
+    var st = { cat: 'all', sort: 'discount', all: false };
+    var LIMIT = 4;
+
+    function getDeals() {
+      var list = getProducts().filter(function (p) { return p.discount > 0 && (st.cat === 'all' || p.cat === st.cat); });
+      if (st.sort === 'price-asc') list.sort(function (a, b) { return a.lowest.p - b.lowest.p; });
+      else if (st.sort === 'price-desc') list.sort(function (a, b) { return b.lowest.p - a.lowest.p; });
+      else list.sort(function (a, b) { return b.discount - a.discount; });
+      return list;
+    }
+
+    function card(p) {
+      return '<article class="card deal-card reveal" data-id="' + p.id + '">' +
+        '<div class="card-media" style="' + tileStyle(p.cat) + '">' + mediaHTML(p) +
+          '<span class="tag-sample">Demo discount</span>' +
+          '<span class="deal-ribbon">' + p.discount + '% OFF</span></div>' +
+        '<div class="card-body">' +
+          '<span class="cat-label">' + esc(CAT_BY_KEY[p.cat].label) + '</span>' +
+          '<h3>' + esc(p.name) + '</h3>' +
+          '<div class="price-row"><span class="price">' + fmt(p.lowest.p) + '</span><span class="price-old">' + fmt(p.mrp) + '</span><span class="off">' + p.discount + '% off</span></div>' +
+          '<span class="lowest-note">Sample price at ' + esc(p.lowest.r) + ' • sample list price shown struck through</span>' +
+          '<div class="card-actions"><button type="button" class="btn btn-primary btn-sm" data-compare="' + p.id + '">View Deal</button></div>' +
+        '</div></article>';
+    }
+
+    function render() {
+      var list = getDeals(), grid = $('#dealGrid'), more = $('#dealMore'), info = $('#dealInfo');
+      var shown = st.all ? list : list.slice(0, LIMIT);
+      if (!list.length) {
+        grid.innerHTML = '<div class="empty"><h3>No sample deals here</h3><p>There are no sample deals in this category.</p>' +
+          '<button type="button" class="btn btn-primary" data-deal-reset="1">Show all deals</button></div>';
+        info.textContent = ''; more.hidden = true;
+      } else {
+        grid.innerHTML = shown.map(card).join('');
+        info.textContent = 'Showing ' + shown.length + ' of ' + list.length + ' sample ' + (list.length === 1 ? 'deal' : 'deals') + '. All prices and discounts are demo data.';
+        more.hidden = list.length <= LIMIT;
+        more.textContent = st.all ? 'Show fewer deals' : 'Show all ' + list.length + ' deals';
+      }
+      $$('#dealChipRow .chip').forEach(function (b) {
+        var on = b.dataset.dealCat === st.cat;
+        b.classList.toggle('active', on); b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      });
+      attachImageFallbacks(grid);
+      observeReveals();
+    }
+
+    function init() {
+      $('#dealChipRow').innerHTML = '<button type="button" class="chip" data-deal-cat="all">All</button>' +
+        CATEGORIES.map(function (c) { return '<button type="button" class="chip" data-deal-cat="' + c.key + '">' + esc(c.label) + '</button>'; }).join('');
+
+      $('#dealChipRow').addEventListener('click', function (e) {
+        var chip = e.target.closest('[data-deal-cat]');
+        if (chip) { st.cat = chip.dataset.dealCat; st.all = false; render(); }
+      });
+      $('#dealSort').addEventListener('change', function (e) { st.sort = e.target.value; render(); });
+      $('#dealMore').addEventListener('click', function () { st.all = !st.all; render(); });
+      $('#dealGrid').addEventListener('click', function (e) {
+        if (e.target.closest('[data-deal-reset]')) { st.cat = 'all'; render(); }
+      });
+      render();
+    }
+    return { init: init };
+  })();
+  /* END JS SECTION 06: DEALS PAGE */
+
+
+  /* ===============================================================
+     START JS SECTION 07: PRODUCT COMPARISON
+     Compare modal: sample retailer offer rows, lowest-price highlight,
+     "Visit Store" only when a valid https URL is configured.
+     DEPENDS ON: SHARED A/B (Layer), Watch.has()/Watch.toggle() (Section 08),
+     Bus ('watch:changed'). Opened by any [data-compare] button
+     (Sections 05, 06 and the watchlist drawer).
+     =============================================================== */
+  var Compare = (function () {
+    function offerUrl(o) {
+      if (isValidUrl(o.url)) return o.url;
+      var r = RETAILERS[o.r];
+      return r && isValidUrl(r.url) ? r.url : '';
+    }
+    function retailerColor(name) { return (RETAILERS[name] && RETAILERS[name].color) || '#5b6f67'; }
+    function availClass(a) { return a === 'In stock' ? 'avail-in' : a === 'Limited stock' ? 'avail-low' : 'avail-out'; }
+    function watchLabel(id) { return Watch.has(id) ? '♥ In watchlist – remove' : '♡ Add to watchlist'; }
+
+    function open(id, trigger) {
+      var p = byId(id); if (!p) return;
+      var offers = p.offers.slice().sort(function (a, b) {
+        var ao = a.a === 'Out of stock' ? 1 : 0, bo = b.a === 'Out of stock' ? 1 : 0;
+        return ao - bo || a.p - b.p;
+      });
+      var highest = Math.max.apply(null, p.offers.map(function (o) { return o.p; }));
+      var anyLink = false;
+
+      var rows = offers.map(function (o) {
+        var isBest = o.r === p.lowest.r && o.p === p.lowest.p;
+        var url = offerUrl(o); if (url) anyLink = true;
+        return '<li class="offer' + (isBest ? ' best' : '') + (o.a === 'Out of stock' ? ' oos' : '') + '">' +
+          '<span class="dot" style="background:' + retailerColor(o.r) + '" aria-hidden="true">' + esc(o.r.charAt(0)) + '</span>' +
+          '<div><b>' + esc(o.r) + '</b><small>' + esc(o.d) + '</small><small class="' + availClass(o.a) + '">' + esc(o.a) + '</small></div>' +
+          '<div class="offer-right">' + (isBest ? '<span class="best-tag">Lowest sample price</span><br>' : '') +
+            '<span class="p">' + fmt(o.p) + '</span>' +
+            (isBest && highest > o.p ? '<small style="display:block;color:var(--ink-mute)">' + fmt(highest - o.p) + ' below highest sample offer</small>' : '') +
+            (url ? '<br><a class="btn btn-primary btn-sm" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer sponsored">Visit Store</a>' : '') +
+          '</div></li>';
+      }).join('');
+
+      var m = $('#compareModal');
+      m.innerHTML =
+        '<div class="modal-head">' +
+          '<div class="modal-thumb" style="' + tileStyle(p.cat) + '">' + catIcon(p.cat) + '</div>' +
+          '<div><span class="cat-label">' + esc(CAT_BY_KEY[p.cat].label) + '</span><h2 id="modalTitle">' + esc(p.name) + '</h2>' +
+          '<div class="rating">' + STAR + '<b>' + p.rating.toFixed(1) + '</b><span>(' + esc(p.reviews) + ' sample ratings)</span></div></div>' +
+          '<button type="button" class="modal-close" data-close aria-label="Close comparison">×</button>' +
+        '</div>' +
+        '<div class="modal-body">' +
+          '<span class="sample-pill">Sample demo offers – not live prices</span>' +
+          '<ul class="offers" aria-label="Sample offers for ' + esc(p.name) + '">' + rows + '</ul>' +
+          '<div class="modal-foot">' +
+            '<button type="button" class="btn btn-soft" data-modal-watch="' + p.id + '">' + watchLabel(p.id) + '</button>' +
+            '<button type="button" class="btn btn-ghost" data-close>Close</button>' +
+          '</div>' +
+          '<p class="fine">Sample list price: ' + fmt(p.mrp) + '. Prices, delivery details and availability above are invented for demonstration and may not match any real retailer. ' +
+            (anyLink ? '' : 'Store links are not configured in this demo, so no “Visit Store” buttons are shown.') + '</p>' +
+        '</div>';
+      Layer.open(m, trigger);
+    }
+
+    function init() {
+      document.addEventListener('click', function (e) {
+        var cmp = e.target.closest('[data-compare]');
+        if (cmp) {
+          var trig = Layer.current() === $('#watchDrawer') ? $('#watchBtn') : cmp;   // return focus somewhere that still exists
+          open(cmp.dataset.compare, trig);
+          return;
+        }
+        var mw = e.target.closest('[data-modal-watch]');
+        if (mw) Watch.toggle(mw.dataset.modalWatch);
+      });
+      Bus.on('watch:changed', function () {
+        $$('[data-modal-watch]').forEach(function (b) { b.textContent = watchLabel(b.dataset.modalWatch); });
+      });
+    }
+    return { init: init, open: open };
+  })();
+  /* END JS SECTION 07: PRODUCT COMPARISON */
+
+
+  /* ===============================================================
+     START JS SECTION 08: WATCHLIST
+     Add/remove, count badge, localStorage persistence, drawer.
+     The saved data is only a list of product IDs under CONFIG.storageKey
+     (this is what the Privacy Policy, Section 12, describes).
+     DEPENDS ON: SHARED A/B (Layer, toast), Bus ('watch:changed').
+     Heart buttons (.wl-btn) are drawn by Section 05; clicks are handled here.
+     =============================================================== */
+  var Watch = (function () {
+    var ids = load();
+
+    function load() {
+      try {
+        var raw = JSON.parse(localStorage.getItem(CONFIG.storageKey) || '[]');
+        if (!Array.isArray(raw)) return [];
+        return raw.filter(function (id, i) { return typeof id === 'string' && raw.indexOf(id) === i && byId(id); });
+      } catch (e) { return []; }                 // storage blocked/corrupt -> start empty
+    }
+    function save() {
+      try { localStorage.setItem(CONFIG.storageKey, JSON.stringify(ids)); }
+      catch (e) { /* storage unavailable: the watchlist works for this visit only */ }
+    }
+    function has(id) { return ids.indexOf(id) !== -1; }
+    function changed() { updateCount(); renderDrawer(); Bus.emit('watch:changed'); }
+
+    function toggle(id) {
+      if (!byId(id)) return;
+      if (has(id)) { ids = ids.filter(function (x) { return x !== id; }); toast('Removed from watchlist'); }
+      else { ids.push(id); toast('Added to watchlist (saved in this browser)'); }
+      save(); changed();
+    }
+    function clearAll() { ids = []; save(); changed(); toast('Watchlist cleared'); }
+
+    function updateCount() {
+      var n = ids.length, c = $('#watchCount');
+      c.textContent = n;
+      c.classList.remove('bump'); void c.offsetWidth; c.classList.add('bump');
+      $('#watchBtn').setAttribute('aria-label', 'Open watchlist, ' + n + (n === 1 ? ' item' : ' items'));
+    }
+
+    function renderDrawer() {
+      var body = $('#drawerBody'), foot = $('#drawerFoot');
+      if (!ids.length) {
+        body.innerHTML = '<div class="empty" style="border:0;padding:40px 10px"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.3-9.2C1.4 8.4 3.4 5 6.8 5c2 0 3.4 1.1 5.2 3 1.8-1.9 3.2-3 5.2-3 3.4 0 5.4 3.4 4.1 6.8C19.5 16.4 12 21 12 21z"/></svg>' +
+          '<h3>Your watchlist is empty</h3><p>Tap the heart on any product to save it here.</p>' +
+          '<button type="button" class="btn btn-primary" data-close data-goto-products="1">Browse products</button></div>';
+        foot.innerHTML = '';
+        return;
+      }
+      body.innerHTML = ids.map(function (id) {
+        var p = byId(id);
+        return '<div class="wl-item"><div class="wl-thumb" style="' + tileStyle(p.cat) + '">' + catIcon(p.cat) + '</div><div>' +
+          '<h3>' + esc(p.name) + '</h3><div class="meta">' + esc(CAT_BY_KEY[p.cat].label) + ' • from ' + fmt(p.lowest.p) + ' <em>(sample)</em></div>' +
+          '<div class="row"><button type="button" class="btn btn-soft btn-sm" data-compare="' + p.id + '">Compare</button>' +
+          '<button type="button" class="btn btn-ghost btn-sm" data-remove="' + p.id + '" aria-label="Remove ' + esc(p.name) + ' from watchlist">Remove</button></div></div></div>';
+      }).join('');
+      foot.innerHTML = '<button type="button" class="btn btn-ghost btn-sm" data-clear-watch>Clear watchlist</button>' +
+        '<p>Saved only in this browser. Price-drop alerts are not available in this demo.</p>';
+    }
+
+    function init() {
+      updateCount(); renderDrawer();
+      $('#watchBtn').addEventListener('click', function (e) { renderDrawer(); Layer.open($('#watchDrawer'), e.currentTarget); });
+      $('#drawerClose').addEventListener('click', function () { Layer.close(); });
+      document.addEventListener('click', function (e) {
+        var t = e.target;
+        var heart = t.closest('.wl-btn');           if (heart) { toggle(heart.dataset.id); return; }
+        var rm = t.closest('[data-remove]');        if (rm) { toggle(rm.dataset.remove); return; }
+        if (t.closest('[data-clear-watch]')) { clearAll(); return; }
+        if (t.closest('[data-goto-products]')) { scrollToId('products'); }
+      });
+    }
+    return { init: init, has: has, toggle: toggle };
+  })();
+  /* END JS SECTION 08: WATCHLIST */
+
+
+  /* ===============================================================
+     START JS SECTION 09: HOW IT WORKS
+     This section is static content: no JavaScript needed.
+     (Scroll-reveal animation for its cards comes from JS SHARED B.)
+     =============================================================== */
+  /* END JS SECTION 09: HOW IT WORKS */
+
+
+  /* ===============================================================
+     START JS SECTION 10: ABOUT US
+     Static content: no JavaScript needed.
+     =============================================================== */
+  /* END JS SECTION 10: ABOUT US */
+
+
+  /* ===============================================================
+     START JS SECTION 11: CONTACT US
+     Validates the form in the browser. It can only SEND a message if
+     CONFIG.contactEndpoint (JS SHARED A) is set to a real https URL of a
+     form-handling service. Otherwise it tells the visitor plainly that
+     nothing was sent. It never fakes a success message.
+     DEPENDS ON: CONFIG (SHARED A), $/$$ helpers.
+     =============================================================== */
+  var Contact = (function () {
+    var RULES = {
+      name:    { min: 2,  max: 80,   label: 'your name' },
+      email:   { min: 5,  max: 120,  label: 'your email address' },
+      subject: { min: 3,  max: 120,  label: 'a subject' },
+      message: { min: 10, max: 2000, label: 'a message' }
+    };
+    var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+    var form, status, note, submit;
+
+    function fieldEl(name) { return $('#contact' + name.charAt(0).toUpperCase() + name.slice(1)); }
+    function errEl(name) { return $('#contact' + name.charAt(0).toUpperCase() + name.slice(1) + 'Error'); }
+    function endpoint() { return isValidUrl(CONFIG.contactEndpoint) ? CONFIG.contactEndpoint : ''; }
+
+    function validate() {
+      var errs = {};
+      Object.keys(RULES).forEach(function (k) {
+        var v = fieldEl(k).value.trim(), r = RULES[k];
+        if (!v) errs[k] = 'Please enter ' + r.label + '.';
+        else if (k === 'email' && !EMAIL_RE.test(v)) errs[k] = 'Please enter a valid email address, like name@example.com.';
+        else if (v.length < r.min) errs[k] = (k === 'message' ? 'Please write at least ' + r.min + ' characters.' : 'That looks too short.');
+        else if (v.length > r.max) errs[k] = 'Please keep this under ' + r.max + ' characters.';
+      });
+      return errs;
+    }
+    function showErrors(errs) {
+      Object.keys(RULES).forEach(function (k) {
+        var f = fieldEl(k), e = errEl(k);
+        if (errs[k]) { f.setAttribute('aria-invalid', 'true'); e.textContent = errs[k]; e.hidden = false; }
+        else { f.removeAttribute('aria-invalid'); e.textContent = ''; e.hidden = true; }
+      });
+    }
+    function setStatus(kind, text) {
+      status.className = 'form-status show ' + kind;
+      status.textContent = text;
+    }
+
+    function onSubmit(e) {
+      e.preventDefault();
+      var errs = validate();
+      showErrors(errs);
+      var bad = Object.keys(errs);
+      if (bad.length) {
+        setStatus('error', 'Please fix the highlighted fields and try again.');
+        fieldEl(bad[0]).focus();
+        return;
+      }
+      if (!endpoint()) {
+        // Honest behaviour: nothing is sent, and we say so. The form keeps the visitor's text.
+        setStatus('warn', 'Your message has NOT been sent. Message delivery is not connected on this demo site yet, so nothing was transmitted or saved. A form-submission service must be connected before this form can send messages.');
+        return;
+      }
+      submit.disabled = true; submit.textContent = 'Sending…';
+      status.className = 'form-status'; status.textContent = '';
+      fetch(endpoint(), { method: 'POST', body: new FormData(form), headers: { 'Accept': 'application/json' } })
+        .then(function (res) {
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          form.reset(); showErrors({});
+          setStatus('success', 'Thank you! Your message was sent.');
+        })
+        .catch(function () {
+          setStatus('error', 'Sorry, your message could not be sent. Please try again later.');
+        })
+        .then(function () { submit.disabled = false; submit.textContent = 'Send message'; });
+    }
+
+    function init() {
+      form = $('#contactForm'); status = $('#contactStatus'); note = $('#contactNote'); submit = $('#contactSubmit');
+      note.hidden = !!endpoint();                     // hide the "not connected" note once a service is configured
+      form.addEventListener('submit', onSubmit);
+      Object.keys(RULES).forEach(function (k) {       // clear a field's error as soon as the visitor edits it
+        fieldEl(k).addEventListener('input', function () {
+          if (fieldEl(k).getAttribute('aria-invalid')) { fieldEl(k).removeAttribute('aria-invalid'); errEl(k).hidden = true; }
+        });
+      });
+    }
+    return { init: init };
+  })();
+  /* END JS SECTION 11: CONTACT US */
+
+
+  /* ===============================================================
+     START JS SECTION 12: PRIVACY POLICY
+     Static content: no JavaScript needed. (Keep it in step with the
+     real behaviour: storage key = CONFIG.storageKey in SHARED A.)
+     =============================================================== */
+  /* END JS SECTION 12: PRIVACY POLICY */
+
+
+  /* ===============================================================
+     START JS SECTION 13: TERMS & CONDITIONS
+     Static content: no JavaScript needed.
+     =============================================================== */
+  /* END JS SECTION 13: TERMS & CONDITIONS */
+
+
+  /* ===============================================================
+     START JS SECTION 14: FOOTER
+     Footer category links + current year. Footer navigation links are
+     plain #anchors in HTML SECTION 14.
+     DEPENDS ON: CATEGORIES (SHARED A), Bus ('search:set' -> Section 05).
+     =============================================================== */
+  var Footer = (function () {
+    function init() {
+      $('#footerCats').innerHTML = CATEGORIES.map(function (c) {
+        return '<li><a href="#products" data-footcat="' + c.key + '">' + esc(c.label) + '</a></li>';
+      }).join('');
+      $('#footerCats').addEventListener('click', function (e) {
+        var a = e.target.closest('[data-footcat]');
+        if (a) Bus.emit('search:set', { query: '', cat: a.dataset.footcat });   // the link's #products anchor does the scrolling
+      });
+      $('#year').textContent = new Date().getFullYear();
+    }
+    return { init: init };
+  })();
+  /* END JS SECTION 14: FOOTER */
+
+
+  /* ===============================================================
+     START JS SHARED C: START-UP
+     Order matters a little: Logo first, then modules that render
+     content, then Watch (needs the rendered cards only for events).
+     =============================================================== */
+  function start() {
+    Layer.init();
+    Logo.init();
+    Header.init();
+    Home.init();
+    Categories.init();
+    Trending.init();
+    Deals.init();
+    Compare.init();
+    Watch.init();
+    Contact.init();
+    Footer.init();
+    observeReveals();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
+
+  // Small debugging/extension surface (no side effects)
+  window.ValueD = { getProducts: getProducts, fmt: fmt };
+  /* END JS SHARED C: START-UP */
 })();
+/* END SECTION 16: JAVASCRIPT */
 </script>
 </body>
 </html>
